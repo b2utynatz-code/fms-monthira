@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AERO - Aerial Technology | In The Clouds</title>
+  <meta name="description"
+    content="Experience Next-Gen Aerial Technology with Aero X-1. Explore drones built for high-altitude cinema and cloud flight." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Syne & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            syne: ['Syne', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              dark: '#0a0b10',
+              accent: '#3b82f6',
+              pink: '#ec4899',
+            }
+          },
+          animation: {
+            'float-drone': 'floatDrone 6s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+            'sound-wave': 'soundWave 1.2s ease-in-out infinite alternate',
+            'spin-slow': 'spin 20s linear infinite',
+          },
+          keyframes: {
+            floatDrone: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-18px) rotate(-1.5deg)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.8', transform: 'scale(1.05)' },
+            },
+            soundWave: {
+              '0%': { height: '4px' },
+              '100%': { height: '18px' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    /* Vibrant Cloud Text Gradient */
+    .hero-text-blend {
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.95) 40%, rgba(185, 218, 248, 0.8) 75%, rgba(135, 182, 230, 0.5) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.3));
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .glass-dark {
+      background: rgba(10, 11, 16, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Rotor Thruster Flare */
+    .thruster-glow {
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.6) 0%, rgba(59, 130, 246, 0.3) 50%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(12px);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white text-slate-900 font-sans antialiased selection:bg-pink-500 selection:text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+  <!-- ==================== HEADER / NAV ==================== -->
+  <header class="w-full bg-white z-40 relative px-6 md:px-12 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+
+      <!-- Brand Logo -->
+      <a href="#" class="group flex items-center gap-2">
+        <span
+          class="font-syne font-extrabold text-2xl tracking-tighter text-slate-950 group-hover:text-pink-600 transition-colors">
+          AERO
+        </span>
+      </a>
+
+      <!-- Center Navigation Links -->
+      <nav class="hidden md:flex items-center space-x-8 text-xs font-bold tracking-wider uppercase text-slate-800">
+        <a href="#fleet"
+          class="hover:text-pink-600 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-pink-600 hover:after:w-full after:transition-all">FLEET</a>
+        <a href="#specs" id="nav-specs"
+          class="hover:text-pink-600 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-pink-600 hover:after:w-full after:transition-all cursor-pointer">SPECS</a>
+        <a href="#telemetry"
+          class="hover:text-pink-600 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-pink-600 hover:after:w-full after:transition-all">TELEMETRY</a>
+        <a href="#flight-modes"
+          class="hover:text-pink-600 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-pink-600 hover:after:w-full after:transition-all">FLIGHT
+          MODES</a>
+        <a href="#custom-lab"
+          class="hover:text-pink-600 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-pink-600 hover:after:w-full after:transition-all">CUSTOM
+          LAB</a>
+      </nav>
+
+      <!-- Right Actions: User Profile & Cart -->
+      <div class="flex items-center space-x-4">
+        <!-- Account Icon -->
+        <button id="btn-account" aria-label="User Account"
+          class="p-2 text-slate-800 hover:text-pink-600 transition-colors rounded-full hover:bg-slate-100">
+          <i data-lucide="user" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Shopping Cart Icon -->
+        <button id="btn-cart" aria-label="Shopping Cart"
+          class="p-2 text-slate-800 hover:text-pink-600 transition-colors rounded-full hover:bg-slate-100 relative">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          <span id="cart-count"
+            class="absolute -top-1 -right-1 bg-slate-900 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center transition-all scale-100">0</span>
+        </button>
+
+        <!-- Mobile Menu Hamburger Button -->
+        <button id="btn-mobile-menu" aria-label="Open Mobile Menu"
+          class="md:hidden p-2 text-slate-800 hover:text-pink-600 transition-colors rounded-lg">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN HERO SECTION ==================== -->
+  <main class="w-full px-3 sm:px-6 md:px-10 pb-8 flex-grow">
+    <div class="max-w-[1440px] mx-auto">
+
+      <!-- HERO CARD CONTAINER -->
+      <section id="hero-card"
+        class="relative w-full h-[78vh] sm:h-[82vh] md:h-[86vh] min-h-[580px] max-h-[920px] rounded-[28px] sm:rounded-[36px] md:rounded-[44px] overflow-hidden shadow-2xl bg-slate-900 border border-slate-200/50 group select-none transition-transform duration-500">
+
+        <!-- 1. Background Video Loop -->
+        <video id="bg-video" autoplay loop muted playsinline
+          class="absolute inset-0 w-full h-full object-cover scale-105 transition-transform duration-1000 ease-out pointer-events-none">
+          <source src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/motion_clouds.mp4" type="video/mp4" />
+          Your browser does not support HTML5 video.
+        </video>
+
+
+
+        <!-- 4. Interactive Floating Drone Asset -->
+        <div id="drone-wrapper"
+          class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none transition-transform duration-200 ease-out"
+          style="transform-style: preserve-3d; perspective: 1000px;">
+          <div id="drone-container"
+            class="relative w-[65%] sm:w-[50%] md:w-[44%] max-w-[620px] min-w-[280px] animate-float-drone pointer-events-auto cursor-pointer group/drone">
+
+            <!-- Drone Image -->
+            <img id="drone-img" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/dron_fly.png" alt="Aero Aerial Drone"
+              class="w-full h-auto object-contain filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.5)] transition-transform duration-500 group-hover/drone:scale-105" />
+
+
+
+          </div>
+        </div>
+
+        <!-- 5. Headline Overlay ("IN THE CLOUDS") -->
+        <div
+          class="absolute bottom-10 sm:bottom-14 md:bottom-16 left-0 right-0 z-10 text-center pointer-events-none px-4 sm:px-8 w-full">
+          <h1
+            class="font-syne font-extrabold text-[10.8vw] sm:text-[9.8vw] md:text-[9.2vw] leading-none uppercase hero-text-blend transform translate-y-3 sm:translate-y-5 tracking-tight inline-block px-2">
+            IN THE CLOUDS
+          </h1>
+        </div>
+
+
+
+      </section>
+    </div>
+  </main>
+
+
+
+  <!-- ==================== MODAL: STEP INSIDE SPEC DRAWER ==================== -->
+  <div id="modal-spec"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-all duration-300">
+    <!-- Backdrop -->
+    <div id="modal-backdrop" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md"></div>
+
+    <!-- Modal Content Window -->
+    <div
+      class="relative w-full max-w-2xl glass-dark rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-white/20 z-10 transform scale-95 transition-all duration-300 overflow-hidden">
+
+      <!-- Close Button -->
+      <button id="btn-close-modal" aria-label="Close Modal"
+        class="absolute top-6 right-6 text-slate-400 hover:text-white bg-white/10 p-2 rounded-full transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Badge & Title -->
+      <div class="flex items-center gap-2 mb-2">
+        <span
+          class="bg-pink-500/20 text-pink-400 text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full border border-pink-500/30">AERO
+          X-SERIES</span>
+        <span class="text-slate-400 text-xs font-semibold">SERIES 01</span>
+      </div>
+
+      <h2 class="font-syne text-2xl sm:text-3xl font-extrabold text-white mb-4">AERIAL CLOUD SPECIFICATIONS</h2>
+
+      <!-- Drone Preview & Specs Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 my-6">
+        <!-- Left: Image Preview -->
+        <div
+          class="bg-slate-900/80 rounded-2xl p-4 flex flex-col items-center justify-center border border-white/10 relative overflow-hidden group">
+          <img src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/dron_fly.png" alt="Drone Spec Preview"
+            class="w-48 h-auto object-contain transform group-hover:scale-110 transition-transform duration-500" />
+          <div class="absolute bottom-3 left-3 flex items-center gap-1 text-[10px] text-slate-400">
+            <i data-lucide="rotate-3d" class="w-3 h-3 text-pink-400"></i> 360° GYRO STABILIZED
+          </div>
+        </div>
+
+        <!-- Right: Specs Details -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+            <span class="text-xs text-slate-400 flex items-center gap-2"><i data-lucide="gauge"
+                class="w-4 h-4 text-blue-400"></i> Max Speed</span>
+            <span class="font-bold text-sm text-white">180 KM/H</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+            <span class="text-xs text-slate-400 flex items-center gap-2"><i data-lucide="battery-charging"
+                class="w-4 h-4 text-emerald-400"></i> Battery Life</span>
+            <span class="font-bold text-sm text-white">45 MINUTES</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+            <span class="text-xs text-slate-400 flex items-center gap-2"><i data-lucide="cloud-snow"
+                class="w-4 h-4 text-pink-400"></i> Max Altitude</span>
+            <span class="font-bold text-sm text-white">12,000 FT</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+            <span class="text-xs text-slate-400 flex items-center gap-2"><i data-lucide="camera"
+                class="w-4 h-4 text-purple-400"></i> Camera Sensor</span>
+            <span class="font-bold text-sm text-white">8K CINEMATIC RAW</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between gap-4 pt-2">
+        <button id="btn-preorder"
+          class="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i> Add To Reserve List ($2,499)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MOBILE MENU DRAWER ==================== -->
+  <div id="mobile-menu"
+    class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col justify-between p-8 text-white opacity-0 pointer-events-none transition-all duration-300">
+    <div class="flex items-center justify-between">
+      <span class="font-syne font-extrabold text-2xl tracking-tighter">AERO</span>
+      <button id="btn-close-mobile-menu" class="p-2 text-slate-400 hover:text-white rounded-full bg-white/10">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <nav class="flex flex-col space-y-6 text-xl font-bold font-syne uppercase text-slate-300">
+      <a href="#fleet" class="mobile-nav-link hover:text-pink-500 transition-colors">FLEET</a>
+      <a href="#specs" class="mobile-nav-link hover:text-pink-500 transition-colors">SPECS</a>
+      <a href="#telemetry" class="mobile-nav-link hover:text-pink-500 transition-colors">TELEMETRY</a>
+      <a href="#flight-modes" class="mobile-nav-link hover:text-pink-500 transition-colors">FLIGHT MODES</a>
+      <a href="#custom-lab" class="mobile-nav-link hover:text-pink-500 transition-colors">CUSTOM LAB</a>
+    </nav>
+
+    <div class="space-y-4">
+      <button id="btn-mobile-step-inside"
+        class="w-full bg-pink-600 text-white py-3.5 rounded-full font-bold uppercase text-xs tracking-wider">
+        Step Inside AERO-X
+      </button>
+      <p class="text-center text-xs text-slate-500">© 2026 AERO Aerial Tech</p>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT INTERACTION LOGIC ==================== -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Element References
+      const heroCard = document.getElementById('hero-card');
+      const droneWrapper = document.getElementById('drone-wrapper');
+      const droneContainer = document.getElementById('drone-container');
+      const bgVideo = document.getElementById('bg-video');
+
+      const btnSoundToggle = document.getElementById('btn-sound-toggle');
+      const soundBars = document.getElementById('sound-bars');
+      const soundText = document.getElementById('sound-text');
+
+      const btnStepInside = document.getElementById('btn-step-inside');
+      const btnMobileStepInside = document.getElementById('btn-mobile-step-inside');
+      const modalSpec = document.getElementById('modal-spec');
+      const modalBackdrop = document.getElementById('modal-backdrop');
+      const btnCloseModal = document.getElementById('btn-close-modal');
+
+      const btnCart = document.getElementById('btn-cart');
+      const cartCount = document.getElementById('cart-count');
+      const btnPreorder = document.getElementById('btn-preorder');
+
+      const btnMobileMenu = document.getElementById('btn-mobile-menu');
+      const btnCloseMobileMenu = document.getElementById('btn-close-mobile-menu');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+      let cartItems = 0;
+
+      // 2. Interactive Sound Toggle
+      let isMuted = true;
+      if (btnSoundToggle) {
+        btnSoundToggle.addEventListener('click', () => {
+          isMuted = !isMuted;
+          bgVideo.muted = isMuted;
+
+          if (!isMuted) {
+            soundText.textContent = 'UNMUTED';
+            soundBars.classList.remove('opacity-50');
+            soundBars.querySelectorAll('span').forEach(bar => bar.classList.add('animate-sound-wave'));
+          } else {
+            soundText.textContent = 'MUTE';
+            soundBars.classList.add('opacity-50');
+            soundBars.querySelectorAll('span').forEach(bar => bar.classList.remove('animate-sound-wave'));
+          }
+        });
+      }
+
+      // 3. Ultra-Dynamic 3D Mouse Flight & Parallax for Flying Drone
+      let mouseX = 0, mouseY = 0;
+      let targetX = 0, targetY = 0;
+
+      window.addEventListener('mousemove', (e) => {
+        const rect = heroCard.getBoundingClientRect();
+        // Calculate offset relative to screen center
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        // Normalized mouse offsets (-1 to 1) with amplified range
+        mouseX = (e.clientX - centerX) / (window.innerWidth / 2);
+        mouseY = (e.clientY - centerY) / (window.innerHeight / 2);
+      });
+
+      // Smooth Physics Animation Loop (High Responsiveness Lerp)
+      function animateParallax() {
+        targetX += (mouseX - targetX) * 0.1;
+        targetY += (mouseY - targetY) * 0.1;
+
+        // Amplified 3D Motion Parameters
+        const moveX = targetX * 115;      // Extended Horizontal travel max 115px
+        const moveY = targetY * 80;       // Extended Vertical travel max 80px
+        const rotateX = -targetY * 26;    // Dynamic Pitch (up/down nose tilt) max 26deg
+        const rotateY = targetX * 32;     // Dynamic Yaw (left/right nose turn) max 32deg
+        const rotateZ = targetX * 14;     // Dynamic Roll (wing tilt) max 14deg
+        const scale3D = 1 + Math.abs(targetY) * 0.08; // Dynamic Depth scale
+
+        if (droneWrapper) {
+          droneWrapper.style.transform = `translate3d(${moveX}px, ${moveY}px, 50px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg) scale(${scale3D})`;
+        }
+
+        requestAnimationFrame(animateParallax);
+      }
+      animateParallax();
+
+      // 4. Modal Open & Close Functions
+      function openModal() {
+        modalSpec.classList.remove('opacity-0', 'pointer-events-none');
+        modalSpec.querySelector('.glass-dark').classList.remove('scale-95');
+        modalSpec.querySelector('.glass-dark').classList.add('scale-100');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        modalSpec.classList.add('opacity-0', 'pointer-events-none');
+        modalSpec.querySelector('.glass-dark').classList.remove('scale-100');
+        modalSpec.querySelector('.glass-dark').classList.add('scale-95');
+        document.body.style.overflow = '';
+      }
+
+      btnStepInside.addEventListener('click', openModal);
+      const navSpecs = document.getElementById('nav-specs');
+      if (navSpecs) {
+        navSpecs.addEventListener('click', (e) => {
+          e.preventDefault();
+          openModal();
+        });
+      }
+      if (btnMobileStepInside) {
+        btnMobileStepInside.addEventListener('click', () => {
+          closeMobileMenu();
+          openModal();
+        });
+      }
+      btnCloseModal.addEventListener('click', closeModal);
+      modalBackdrop.addEventListener('click', closeModal);
+
+      // ESC Key Listener for Modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+
+      // 5. Pre-order / Add to Cart Interaction
+      btnPreorder.addEventListener('click', () => {
+        cartItems++;
+        cartCount.textContent = cartItems;
+        cartCount.classList.add('scale-125', 'bg-pink-600');
+
+        setTimeout(() => {
+          cartCount.classList.remove('scale-125', 'bg-pink-600');
+        }, 300);
+
+        // Feedback toast button state
+        const originalText = btnPreorder.innerHTML;
+        btnPreorder.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> Reserved AERO-X Drone!`;
+        btnPreorder.classList.remove('from-pink-600', 'to-purple-600');
+        btnPreorder.classList.add('from-emerald-600', 'to-teal-600');
+        lucide.createIcons();
+
+        setTimeout(() => {
+          btnPreorder.innerHTML = originalText;
+          btnPreorder.classList.remove('from-emerald-600', 'to-teal-600');
+          btnPreorder.classList.add('from-pink-600', 'to-purple-600');
+          lucide.createIcons();
+          closeModal();
+        }, 1500);
+      });
+
+      // 6. Mobile Menu Logic
+      function openMobileMenu() {
+        mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMobileMenu() {
+        mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = '';
+      }
+
+      btnMobileMenu.addEventListener('click', openMobileMenu);
+      btnCloseMobileMenu.addEventListener('click', closeMobileMenu);
+      mobileNavLinks.forEach(link => link.addEventListener('click', closeMobileMenu));
+    });
+  </script>
+</body>
+
+</html>

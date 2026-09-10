@@ -36,7 +36,7 @@ console.log("🗄️  กำลังรัน Database Migrations...");
 try {
   execSync("npx prisma migrate deploy", { cwd: rootDir, stdio: "inherit" });
   console.log("✅ Migration สำเร็จ\n");
-} catch (error) {
+} catch {
   console.warn("⚠️  ไม่สามารถเชื่อมต่อฐานข้อมูลเพื่อ Migrate ได้ กรุณาตรวจสอบว่า Postgres รันอยู่และสร้างฐานข้อมูลแล้ว:");
   console.warn("   คำสั่งสร้างฐานข้อมูล: createdb -U postgres ums_dev\n");
 }
@@ -46,7 +46,7 @@ console.log("🌱 กำลัง Seed ข้อมูลผู้ใช้แ�
 try {
   execSync("npm run db:seed", { cwd: rootDir, stdio: "inherit" });
   console.log("✅ Seed ข้อมูลสำเร็จ\n");
-} catch (error) {
+} catch {
   console.warn("⚠️  ข้ามขั้นตอน Seed ข้อมูล (สามารถรัน npm run db:seed เองภายหลังเมื่อเตรียม DB เสร็จ)\n");
 }
 
