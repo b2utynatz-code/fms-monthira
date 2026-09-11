@@ -15,6 +15,12 @@ import {
   User,
   Settings,
   LogOut,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  ChevronRight,
+  ArrowUp,
 } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "next-themes";
@@ -336,12 +342,19 @@ export function PortalLayoutClient({ tenant, children }: PortalLayoutClientProps
       {/* Main Page Content */}
       <main className="flex-1">{children}</main>
 
-      {/* Public Footer */}
-      <footer className="border-t bg-muted/40 py-12 text-sm">
-        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <i className="w-[30px] h-[30px] rounded-[var(--r-sm)] flex items-center justify-center shrink-0 bg-[var(--brand)] text-[var(--on-brand)] overflow-hidden shadow-xs font-normal">
+      {/* Public Footer — Liyon Ink Band Theme */}
+      <footer className="relative mt-20 bg-[var(--ink-band)] text-[var(--ink-band-text)] border-t border-white/10 shadow-2xl overflow-hidden">
+        {/* Decorative background glow based on current brand color */}
+        <div
+          aria-hidden="true"
+          className="absolute -top-40 left-1/3 -translate-x-1/2 w-96 h-96 rounded-full bg-[var(--brand)] opacity-10 blur-3xl pointer-events-none"
+        />
+
+        <div className="foot-in relative z-10">
+          {/* Column 1: Brand, Tagline, Vision & Badges */}
+          <div className="space-y-4">
+            <Link className="brand-blk inline-flex items-center gap-3 text-inherit no-underline" href="/portal">
+              <i className="w-[38px] h-[38px] rounded-[var(--r-sm)] flex items-center justify-center shrink-0 bg-[var(--brand)] text-[var(--on-brand)] overflow-hidden shadow-md font-normal">
                 {tenant?.logoUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -350,78 +363,174 @@ export function PortalLayoutClient({ tenant, children }: PortalLayoutClientProps
                     style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "inherit" }}
                   />
                 ) : (
-                  <svg viewBox="0 0 24 24" className="w-[16px] h-[16px] fill-current" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" className="w-[20px] h-[20px] fill-current" aria-hidden="true">
                     <path d="M22 10 12 5 2 10l10 5 10-5Z" />
                     <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
                   </svg>
                 )}
               </i>
-              <div className="font-bold text-base">{facultyName}</div>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+              <div className="t">
+                <b className="block text-base font-bold leading-tight text-[var(--ink-band-text)]">
+                  {facultyName}
+                </b>
+                <span className="block text-xs text-[var(--ink-band-muted)] font-normal leading-tight mt-0.5">
+                  {locale === "en" ? "Faculty of Management Sciences" : "ระบบบริการสารสนเทศและบริหารงานคณะ"}
+                </span>
+              </div>
+            </Link>
+
+            <p className="foot-tag text-xs leading-relaxed text-[var(--ink-band-muted)] max-w-sm">
               {locale === "en"
                 ? "Dedicated to cultivating leadership, business insight, and digital innovative minds for sustainable society."
-                : "มุ่งมั่นผลิตบัณฑิตที่มีคุณธรรม เชี่ยวชาญวิชาการ ก้าวทันเทคโนโลยี และสร้างสรรค์นวัตกรรมสู่สากล"}
+                : "มุ่งมั่นผลิตบัณฑิตที่มีคุณธรรม เชี่ยวชาญวิชาการ ก้าวทันเทคโนโลยี และสร้างสรรค์นวัตกรรมเพื่อการพัฒนาสังคมอย่างยั่งยืน"}
             </p>
+
+            <div className="flex flex-wrap gap-2 pt-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/5 border border-white/10 text-[var(--ink-band-text)]">
+                <GraduationCap className="h-3.5 w-3.5 text-[var(--brand-light)]" />
+                <span>{locale === "en" ? "Quality Education" : "มาตรฐานการศึกษาสากล"}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/5 border border-white/10 text-[var(--ink-band-text)]">
+                <ShieldCheck className="h-3.5 w-3.5 text-[var(--brand-light)]" />
+                <span>{locale === "en" ? "Digital Management" : "การบริหารจัดการดิจิทัล"}</span>
+              </span>
+            </div>
           </div>
 
-          <div>
-            <div className="font-semibold mb-3">{locale === "en" ? "Quick Links" : "ลิงก์ด่วน"}</div>
-            <ul className="space-y-2 text-xs text-muted-foreground">
-              <li>
-                <Link href="/portal/curriculum" className="hover:text-primary">
-                  {locale === "en" ? "Curriculum" : "หลักสูตรทั้งหมด"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/portal/staff" className="hover:text-primary">
-                  {locale === "en" ? "Faculty Members" : "ทำเนียบอาจารย์"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/portal/news" className="hover:text-primary">
-                  {locale === "en" ? "Announcements" : "ประกาศและข่าวสาร"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/portal/bookings" className="hover:text-primary">
-                  {locale === "en" ? "Room Schedule" : "ปฏิทินห้องประชุม"}
-                </Link>
-              </li>
-            </ul>
+          {/* Column 2: Quick Links & Internal Systems */}
+          <div className="grid grid-cols-2 gap-6 sm:gap-8">
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-band-muted)] mb-3">
+                {locale === "en" ? "PORTAL" : "บริการหน้าเว็บ"}
+              </h4>
+              <ul className="space-y-2.5 text-xs text-[var(--ink-band-muted)]">
+                <li>
+                  <Link href="/portal" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "Home" : "หน้าหลัก"}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/portal/news" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "News" : "ข่าวสารและประกาศ"}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/portal/staff" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "Faculty & Staff" : "ทำเนียบคณาจารย์"}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/portal/curriculum" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "Curriculum" : "หลักสูตรทั้งหมด"}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/portal/bookings" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "Room Schedule" : "ตารางใช้ห้อง"}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/portal/documents" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "e-Documents" : "เอกสาร/คำร้อง"}</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-band-muted)] mb-3">
+                {locale === "en" ? "INTERNAL" : "ระบบงานภายใน"}
+              </h4>
+              <ul className="space-y-2.5 text-xs text-[var(--ink-band-muted)]">
+                <li>
+                  <Link href="/dashboard" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "Admin Console" : "ระบบหลังบ้านคณะ"}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/documents" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "Document Flow" : "สารบรรณและคำขอ"}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/bookings" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "Reservations" : "จองห้องและยานพาหนะ"}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/me" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{t("account.profile")}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink-band-text)]">
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    <span>{locale === "en" ? "Staff Login" : "เข้าสู่ระบบบุคลากร"}</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
 
-          <div>
-            <div className="font-semibold mb-3">{locale === "en" ? "Internal Systems" : "ระบบงานภายใน"}</div>
-            <ul className="space-y-2 text-xs text-muted-foreground">
-              <li>
-                <Link href="/login" className="hover:text-primary">
-                  {locale === "en" ? "Admin Console" : "ระบบหลังบ้านคณะ (Admin)"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/documents" className="hover:text-primary">
-                  {locale === "en" ? "Document Workflow" : "ระบบสารบรรณและคำขอ"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/bookings" className="hover:text-primary">
-                  {locale === "en" ? "Resource Reservations" : "ระบบจองห้องและยานพาหนะ"}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="space-y-2 text-xs text-muted-foreground">
-            <div className="font-semibold text-foreground mb-3">{locale === "en" ? "Contact Us" : "ติดต่อคณะ"}</div>
-            <p>123 ถนนมหาวิทยาลัย ตำบลในเมือง อำเภอเมือง จังหวัดกรุงเทพฯ 10000</p>
-            <p>โทรศัพท์: 02-123-4567 ต่อ 100-104</p>
-            <p>อีเมล: contact@fms.ac.th</p>
+          {/* Column 3: Contact & Working Hours */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-band-muted)] mb-3">
+              {locale === "en" ? "CONTACT & HOURS" : "ติดต่อและเวลาทำการ"}
+            </h4>
+            <div className="space-y-3 text-xs text-[var(--ink-band-muted)]">
+              <div className="flex items-start gap-2.5">
+                <MapPin className="h-4 w-4 shrink-0 text-[var(--brand-light)] mt-0.5" />
+                <span className="leading-relaxed">
+                  {locale === "en"
+                    ? "Faculty of Management Sciences, 123 University Avenue, Bangkok 10000"
+                    : "คณะวิทยาการจัดการ 123 ถนนมหาวิทยาลัย แขวงในเมือง เขตเมือง กรุงเทพฯ 10000"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
+                <span>02-123-4567 {locale === "en" ? "ext. 100-104" : "ต่อ 100-104"}</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Mail className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
+                <span>contact@fms.ac.th</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Clock className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
+                <span>{locale === "en" ? "Mon – Fri: 08:30 – 16:30" : "จันทร์ – ศุกร์: 08:30 – 16:30 น."}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 mt-8 pt-6 border-t text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {facultyName}. Powered by VibeCore Framework.
+        {/* Footer Bottom Bar */}
+        <div className="foot-bottom">
+          <div className="foot-bottom-in">
+            <div>
+              © {new Date().getFullYear()} {facultyName}. {locale === "en" ? "All rights reserved." : "สงวนลิขสิทธิ์ทั้งหมด."}
+            </div>
+            <div className="flex items-center gap-4 text-xs">
+              <span className="opacity-80">Powered by VibeCore Framework</span>
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="inline-flex items-center gap-1 hover:text-[var(--ink-band-text)] transition-colors cursor-pointer"
+                aria-label="Back to top"
+              >
+                <span>{locale === "en" ? "Back to top" : "กลับขึ้นด้านบน"}</span>
+                <ArrowUp className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
