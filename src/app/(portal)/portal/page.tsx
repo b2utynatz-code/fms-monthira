@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, Newspaper, GraduationCap, BookOpen, CalendarDays, ChevronRight, FileText, Search, Users } from "lucide-react";
+import { ArrowRight, Newspaper, GraduationCap, CalendarDays, ChevronRight, FileText, Search, Users } from "lucide-react";
 import { prisma } from "@/shared/lib/infra/prisma";
 import { Button } from "@/components/ui/button";
 import { getLocale } from "@/shared/lib/i18n/server";
 import { formatDate } from "@/shared/lib/format";
+import { PortalValleyHero } from "../_components/portal-valley-hero";
 
 export const dynamic = "force-dynamic";
 
@@ -40,64 +41,8 @@ export default async function PortalHomePage() {
 
   return (
     <div className="space-y-16 pb-16">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background py-20 md:py-32">
-        <div className="container mx-auto px-4 text-center max-w-4xl space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border bg-background/80 px-4 py-1.5 text-xs font-medium backdrop-blur shadow-xs">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>{locale === "en" ? "Admissions Open for Academic Year 2026" : "เปิดรับสมัครนักศึกษาใหม่ ประจำปีการศึกษา 2569"}</span>
-          </div>
-
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground leading-tight">
-            {locale === "en" ? (
-              <>Empowering Future Leaders with <span className="text-primary">Innovation</span> & <span className="text-primary">Integrity</span></>
-            ) : (
-              <>สร้างผู้นำแห่งอนาคตด้วย <span className="text-primary">นวัตกรรม</span> และ <span className="text-primary">คุณธรรม</span></>
-            )}
-          </h1>
-
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            {locale === "en"
-              ? "Faculty of Management Sciences offers internationally accredited programs designed to cultivate entrepreneurial mindset, digital skills, and global perspectives."
-              : "คณะวิทยาการจัดการ มุ่งเน้นการเรียนรู้เชิงปฏิบัติการ ผสานเทคโนโลยีดิจิทัล และพัฒนาทักษะการเป็นผู้ประกอบการ เพื่อตอบโจทย์ตลาดแรงงานระดับสากล"}
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <Button asChild size="lg" className="gap-2">
-              <Link href="/portal/curriculum">
-                <BookOpen className="h-4 w-4" />
-                <span>{locale === "en" ? "Explore Programs" : "ดูหลักสูตรทั้งหมด"}</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="gap-2">
-              <Link href="/portal/news">
-                <span>{locale === "en" ? "Latest News" : "ข่าวสารล่าสุด"}</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-
-          {/* Highlights Counter */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-12 border-t mt-12 max-w-3xl mx-auto">
-            <div className="space-y-1">
-              <div className="text-3xl font-bold text-primary">12+</div>
-              <div className="text-xs text-muted-foreground">{locale === "en" ? "Academic Programs" : "หลักสูตรมาตรฐาน"}</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold text-primary">{staffCount || "35"}+</div>
-              <div className="text-xs text-muted-foreground">{locale === "en" ? "Faculty Members" : "คณาจารย์และผู้เชี่ยวชาญ"}</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold text-primary">98%</div>
-              <div className="text-xs text-muted-foreground">{locale === "en" ? "Graduate Employment" : "อัตราการได้งานทำ"}</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold text-primary">2,500+</div>
-              <div className="text-xs text-muted-foreground">{locale === "en" ? "Current Students" : "นักศึกษาปัจจุบัน"}</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Cinematic Valley Hero Section */}
+      <PortalValleyHero locale={locale} staffCount={staffCount} />
 
       {/* Quick Services & e-Tracking Search Hub */}
       <section className="container mx-auto px-4 -mt-8 relative z-10">
