@@ -2,13 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, Newspaper, BookOpen, CalendarDays, FileText, LogIn, Menu, X, ShieldCheck } from "lucide-react";
+import {
+  GraduationCap,
+  Newspaper,
+  BookOpen,
+  CalendarDays,
+  FileText,
+  LogIn,
+  Menu,
+  X,
+  ShieldCheck,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "next-themes";
+import { signOut } from "next-auth/react";
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Button } from "@/components/ui/button";
 import { useLocale, useT } from "@/shared/lib/i18n/client";
 import { useAppSession } from "@/hooks/use-session";
+import { hasPermission, P } from "@/features/identity";
 
 export interface PortalLayoutClientProps {
   tenant?: {
@@ -26,6 +42,13 @@ export function PortalLayoutClient({ tenant, children }: PortalLayoutClientProps
   const { theme, setTheme } = useTheme();
   const session = useAppSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const user = session.user;
+  const initials = (user?.name ?? "?").trim().charAt(0).toUpperCase() || "?";
+  const canSettings = hasPermission(
+    { roles: session.roles, permissions: session.permissions, isSuperAdmin: session.isSuperAdmin },
+    P.settingsManage
+  );
 
   const navLinks = [
     { href: "/portal", label: locale === "en" ? "Home" : "หน้าแรก" },
@@ -133,14 +156,77 @@ export function PortalLayoutClient({ tenant, children }: PortalLayoutClientProps
             {/* Language Switcher */}
             <LanguageSwitcher className="lang" />
 
-            {/* Staff / Admin Login or Dashboard button */}
-            {session.isAuthenticated ? (
-              <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex gap-1.5 text-xs h-8">
-                <Link href="/dashboard">
-                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                  <span>{locale === "en" ? "Admin Console" : "ระบบหลังบ้าน"}</span>
-                </Link>
-              </Button>
+            {/* Account Avatar Menu or Staff Login button */}
+            {session.isLoading ? (
+              <div aria-hidden="true" className="h-8 w-8 animate-pulse rounded-full bg-[var(--glass-strong)]" />
+            ) : session.isAuthenticated && user ? (
+              <div className="acct hidden sm:block">
+                <DropdownMenuPrimitive.Root>
+                  <DropdownMenuPrimitive.Trigger asChild>
+                    <button type="button" aria-label={t("account.profile")}>
+                      <span className="who" aria-hidden="true">
+                        {user.image ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={user.image} alt="" className="h-full w-full rounded-full object-cover" />
+                        ) : (
+                          initials
+                        )}
+                      </span>
+                      <span className="nm">{user.name}</span>
+                      <svg className="chev" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </button>
+                  </DropdownMenuPrimitive.Trigger>
+                  <DropdownMenuPrimitive.Portal>
+                    <DropdownMenuPrimitive.Content
+                      className="menu-list"
+                      align="end"
+                      sideOffset={8}
+                      style={{ position: "static" }}
+                    >
+                      <DropdownMenuPrimitive.Label asChild>
+                        <div className="px-2.5 py-2">
+                          <p className="text-sm font-medium">{user.name}</p>
+                          <p className="text-xs text-muted-foreground">{user.email}</p>
+                        </div>
+                      </DropdownMenuPrimitive.Label>
+                      <DropdownMenuPrimitive.Separator asChild>
+                        <hr />
+                      </DropdownMenuPrimitive.Separator>
+                      <DropdownMenuPrimitive.Item asChild>
+                        <Link href="/dashboard">
+                          <ShieldCheck className="h-4 w-4" />
+                          {locale === "en" ? "Admin Console" : "ระบบหลังบ้าน"}
+                        </Link>
+                      </DropdownMenuPrimitive.Item>
+                      <DropdownMenuPrimitive.Item asChild>
+                        <Link href="/me">
+                          <User className="h-4 w-4" />
+                          {t("account.profile")}
+                        </Link>
+                      </DropdownMenuPrimitive.Item>
+                      {canSettings && (
+                        <DropdownMenuPrimitive.Item asChild>
+                          <Link href="/settings">
+                            <Settings className="h-4 w-4" />
+                            {t("nav.settings")}
+                          </Link>
+                        </DropdownMenuPrimitive.Item>
+                      )}
+                      <DropdownMenuPrimitive.Separator asChild>
+                        <hr />
+                      </DropdownMenuPrimitive.Separator>
+                      <DropdownMenuPrimitive.Item asChild onSelect={() => signOut({ callbackUrl: "/login" })}>
+                        <button type="button" className="danger">
+                          <LogOut className="h-4 w-4" />
+                          {t("account.logout")}
+                        </button>
+                      </DropdownMenuPrimitive.Item>
+                    </DropdownMenuPrimitive.Content>
+                  </DropdownMenuPrimitive.Portal>
+                </DropdownMenuPrimitive.Root>
+              </div>
             ) : (
               <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex gap-1.5 text-xs h-8">
                 <Link href="/login">
@@ -185,13 +271,55 @@ export function PortalLayoutClient({ tenant, children }: PortalLayoutClientProps
               );
             })}
             <div className="pt-3 border-t border-[var(--glass-border)] flex flex-col gap-2">
-              {session.isAuthenticated ? (
-                <Button asChild className="w-full gap-2 text-xs" size="sm">
-                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>{locale === "en" ? "Admin Console" : "ระบบหลังบ้าน"}</span>
-                  </Link>
-                </Button>
+              {session.isAuthenticated && user ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2.5 px-3 py-2 rounded-[var(--r-ctl)] bg-[var(--glass)] border border-[var(--glass-border)]">
+                    <span className="who w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-[var(--brand)] text-[var(--on-brand)] font-bold text-xs overflow-hidden">
+                      {user.image ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={user.image} alt="" className="h-full w-full rounded-full object-cover" />
+                      ) : (
+                        initials
+                      )}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{user.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <Button asChild className="w-full gap-2 text-xs" size="sm">
+                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                      <ShieldCheck className="h-4 w-4" />
+                      <span>{locale === "en" ? "Admin Console" : "ระบบหลังบ้าน"}</span>
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full gap-2 text-xs" size="sm">
+                    <Link href="/me" onClick={() => setMobileMenuOpen(false)}>
+                      <User className="h-4 w-4" />
+                      <span>{t("account.profile")}</span>
+                    </Link>
+                  </Button>
+                  {canSettings && (
+                    <Button asChild variant="outline" className="w-full gap-2 text-xs" size="sm">
+                      <Link href="/settings" onClick={() => setMobileMenuOpen(false)}>
+                        <Settings className="h-4 w-4" />
+                        <span>{t("nav.settings")}</span>
+                      </Link>
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    className="w-full gap-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 justify-center"
+                    size="sm"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      signOut({ callbackUrl: "/login" });
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>{t("account.logout")}</span>
+                  </Button>
+                </div>
               ) : (
                 <Button asChild className="w-full gap-2 text-xs" size="sm" variant="outline">
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
