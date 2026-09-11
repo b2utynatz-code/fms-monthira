@@ -20,7 +20,7 @@ export async function createFacultyMemberAction(input: unknown): Promise<ActionR
   return runAction(async () => {
     const ctx = await requirePermission(STAFF_P.staffManage);
     const parsed = createStaffSchema.parse(input, { error: zodErrorMap(await getLocale()) });
-    const result = await createFacultyMember(ctx.tenantId, parsed);
+    const result = await createFacultyMember(ctx.tenantId, ctx.userId, parsed);
     revalidatePath("/staff");
     return result;
   });
@@ -30,7 +30,7 @@ export async function updateFacultyMemberAction(input: unknown): Promise<ActionR
   return runAction(async () => {
     const ctx = await requirePermission(STAFF_P.staffManage);
     const parsed = updateStaffSchema.parse(input, { error: zodErrorMap(await getLocale()) });
-    const result = await updateFacultyMember(ctx.tenantId, parsed);
+    const result = await updateFacultyMember(ctx.tenantId, ctx.userId, parsed);
     revalidatePath("/staff");
     return result;
   });
@@ -39,7 +39,8 @@ export async function updateFacultyMemberAction(input: unknown): Promise<ActionR
 export async function deleteFacultyMemberAction(id: string): Promise<ActionResult<void>> {
   return runAction(async () => {
     const ctx = await requirePermission(STAFF_P.staffManage);
-    await deleteFacultyMember(ctx.tenantId, id);
+    await deleteFacultyMember(ctx.tenantId, ctx.userId, id);
     revalidatePath("/staff");
   });
 }
+

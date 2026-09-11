@@ -87,6 +87,7 @@ export function BookingsClient({
   // Resource Form states
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<BookingResourceDto | null>(null);
+  const [deleteResourceConfirmItem, setDeleteResourceConfirmItem] = useState<BookingResourceDto | null>(null);
   const [resType, setResType] = useState<"MEETING_ROOM" | "VEHICLE">("MEETING_ROOM");
   const [resNameTh, setResNameTh] = useState("");
   const [resNameEn, setResNameEn] = useState("");
@@ -281,11 +282,11 @@ export function BookingsClient({
 
   // Delete Resource
   const handleDeleteResource = (res: BookingResourceDto) => {
-    if (!confirm(`ต้องการลบ ${res.nameTh} ใช่หรือไม่?`)) return;
     startTransition(async () => {
       const result = await deleteBookingResourceAction(res.id);
       if (result.ok) {
         setResources((prev) => prev.filter((r) => r.id !== res.id));
+        setDeleteResourceConfirmItem(null);
         toast.success(t("common.delete"));
       } else {
         toast.error(result.error.message || t("common.error"));
@@ -558,7 +559,7 @@ export function BookingsClient({
                 <RowMenuItem onSelect={() => openEditResourceDialog(row)} icon={<Edit className="h-4 w-4" />}>
                   {t("bookings.resource.edit")}
                 </RowMenuItem>
-                <RowMenuItem onSelect={() => handleDeleteResource(row)} danger icon={<Trash2 className="h-4 w-4" />}>
+                <RowMenuItem onSelect={() => setDeleteResourceConfirmItem(row)} danger icon={<Trash2 className="h-4 w-4" />}>
                   {t("common.delete")}
                 </RowMenuItem>
               </>
@@ -822,7 +823,29 @@ export function BookingsClient({
           </Button>
         </LiyonDialogFooter>
       </LiyonDialog>
+
+      {/* Dialog ยืนยันการลบทรัพยากร */}
+      <LiyonDialog open={!!deleteResourceConfirmItem} onOpenChange={(open) => !open && setDeleteResourceConfirmItem(null)} danger>
+        <LiyonDialogHeader
+          title={t("common.delete")}
+          description={t("common.confirmDelete")}
+        />
+        <LiyonDialogBody>
+          <p className="text-sm text-muted-foreground">
+            {deleteResourceConfirmItem?.nameTh} ({deleteResourceConfirmItem?.nameEn})
+          </p>
+        </LiyonDialogBody>
+        <LiyonDialogFooter>
+          <Button variant="outline" onClick={() => setDeleteResourceConfirmItem(null)} disabled={isPending}>
+            {t("common.cancel")}
+          </Button>
+          <Button variant="destructive" onClick={() => deleteResourceConfirmItem && handleDeleteResource(deleteResourceConfirmItem)} disabled={isPending}>
+            {t("common.delete")}
+          </Button>
+        </LiyonDialogFooter>
+      </LiyonDialog>
     </div>
   );
 }
+
 

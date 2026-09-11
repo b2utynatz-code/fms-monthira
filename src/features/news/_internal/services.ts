@@ -23,7 +23,7 @@ export interface NewsArticleDto {
   updatedAt: string;
 }
 
-function generateSlug(text: string): string {
+export function generateSlug(text: string): string {
   const base = text
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
@@ -31,6 +31,7 @@ function generateSlug(text: string): string {
     .slice(0, 80);
   return `${base || "news"}-${Date.now().toString(36)}`;
 }
+
 
 export async function listNews(tenantId: string, options?: { status?: "DRAFT" | "PUBLISHED" | "ARCHIVED"; category?: string; limit?: number }): Promise<NewsArticleDto[]> {
   const items = await prisma.newsArticle.findMany({
@@ -101,24 +102,40 @@ export async function getNewsBySlug(tenantId: string, slug: string): Promise<New
 
 export async function createNews(tenantId: string, authorId: string, input: CreateNewsInput): Promise<NewsArticleDto> {
   const slug = input.slug?.trim() || generateSlug(input.titleEn || input.titleTh);
-  const created = await prisma.newsArticle.create({
-    data: {
-      tenantId,
-      authorId,
-      titleTh: input.titleTh,
-      titleEn: input.titleEn,
-      slug,
-      summaryTh: input.summaryTh ?? null,
-      summaryEn: input.summaryEn ?? null,
-      contentTh: input.contentTh,
-      contentEn: input.contentEn ?? null,
-      category: input.category,
-      coverImageUrl: input.coverImageUrl || null,
-      isPinned: input.isPinned,
-      pinPriority: input.pinPriority,
-      status: input.status,
-      publishedAt: input.status === "PUBLISHED" ? (input.publishedAt ? new Date(input.publishedAt) : new Date()) : null,
-    },
+
+  const created = await prisma.$transaction(async (tx) => {
+    const item = await tx.newsArticle.create({
+      data: {
+        tenantId,
+        authorId,
+        titleTh: input.titleTh,
+        titleEn: input.titleEn,
+        slug,
+        summaryTh: input.summaryTh ?? null,
+        summaryEn: input.summaryEn ?? null,
+        contentTh: input.contentTh,
+        contentEn: input.contentEn ?? null,
+        category: input.category,
+        coverImageUrl: input.coverImageUrl || null,
+        isPinned: input.isPinned,
+        pinPriority: input.pinPriority,
+        status: input.status,
+        publishedAt: input.status === "PUBLISHED" ? (input.publishedAt ? new Date(input.publishedAt) : new Date()) : null,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId: authorId,
+        action: "news.create",
+        entity: "news_article",
+        entityId: item.id,
+        after: { titleTh: item.titleTh, slug: item.slug, status: item.status },
+      },
+    });
+
+    return item;
   });
 
   return {
@@ -143,23 +160,38 @@ export async function createNews(tenantId: string, authorId: string, input: Crea
   };
 }
 
-export async function updateNews(tenantId: string, input: UpdateNewsInput): Promise<NewsArticleDto> {
-  const updated = await prisma.newsArticle.update({
-    where: { id: input.id, tenantId },
-    data: {
-      titleTh: input.titleTh,
-      titleEn: input.titleEn,
-      summaryTh: input.summaryTh,
-      summaryEn: input.summaryEn,
-      contentTh: input.contentTh,
-      contentEn: input.contentEn,
-      category: input.category,
-      coverImageUrl: input.coverImageUrl || null,
-      isPinned: input.isPinned,
-      pinPriority: input.pinPriority,
-      status: input.status,
-      publishedAt: input.publishedAt !== undefined ? (input.publishedAt ? new Date(input.publishedAt) : null) : undefined,
-    },
+export async function updateNews(tenantId: string, actorId: string, input: UpdateNewsInput): Promise<NewsArticleDto> {
+  const updated = await prisma.$transaction(async (tx) => {
+    const item = await tx.newsArticle.update({
+      where: { id: input.id, tenantId },
+      data: {
+        titleTh: input.titleTh,
+        titleEn: input.titleEn,
+        summaryTh: input.summaryTh,
+        summaryEn: input.summaryEn,
+        contentTh: input.contentTh,
+        contentEn: input.contentEn,
+        category: input.category,
+        coverImageUrl: input.coverImageUrl || null,
+        isPinned: input.isPinned,
+        pinPriority: input.pinPriority,
+        status: input.status,
+        publishedAt: input.publishedAt !== undefined ? (input.publishedAt ? new Date(input.publishedAt) : null) : undefined,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId,
+        action: "news.update",
+        entity: "news_article",
+        entityId: item.id,
+        after: { titleTh: item.titleTh, status: item.status },
+      },
+    });
+
+    return item;
   });
 
   return {
@@ -184,8 +216,27 @@ export async function updateNews(tenantId: string, input: UpdateNewsInput): Prom
   };
 }
 
-export async function deleteNews(tenantId: string, id: string): Promise<void> {
-  await prisma.newsArticle.delete({
-    where: { id, tenantId },
+export async function deleteNews(tenantId: string, actorId: string, id: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.newsArticle.findUnique({
+      where: { id, tenantId },
+      select: { titleTh: true, slug: true },
+    });
+
+    await tx.newsArticle.delete({
+      where: { id, tenantId },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId,
+        action: "news.delete",
+        entity: "news_article",
+        entityId: id,
+        before: existing ? { titleTh: existing.titleTh, slug: existing.slug } : undefined,
+      },
+    });
   });
 }
+

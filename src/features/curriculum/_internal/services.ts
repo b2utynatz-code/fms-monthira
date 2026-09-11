@@ -89,27 +89,42 @@ export async function getProgramById(tenantId: string, id: string): Promise<Acad
   };
 }
 
-export async function createProgram(tenantId: string, input: CreateProgramInput): Promise<AcademicProgramDto> {
-  const created = await prisma.academicProgram.create({
-    data: {
-      tenantId,
-      code: input.code,
-      nameTh: input.nameTh,
-      nameEn: input.nameEn,
-      degreeTh: input.degreeTh,
-      degreeEn: input.degreeEn,
-      degreeLevel: input.degreeLevel,
-      department: input.department,
-      durationYears: input.durationYears,
-      totalCredits: input.totalCredits,
-      tuitionFeePerTerm: input.tuitionFeePerTerm ?? null,
-      careerPaths: input.careerPaths,
-      admissionLink: input.admissionLink || null,
-      curriculumPdfUrl: input.curriculumPdfUrl || null,
-      descriptionTh: input.descriptionTh || null,
-      descriptionEn: input.descriptionEn || null,
-      status: input.status,
-    },
+export async function createProgram(tenantId: string, actorId: string, input: CreateProgramInput): Promise<AcademicProgramDto> {
+  const created = await prisma.$transaction(async (tx) => {
+    const item = await tx.academicProgram.create({
+      data: {
+        tenantId,
+        code: input.code,
+        nameTh: input.nameTh,
+        nameEn: input.nameEn,
+        degreeTh: input.degreeTh,
+        degreeEn: input.degreeEn,
+        degreeLevel: input.degreeLevel,
+        department: input.department,
+        durationYears: input.durationYears,
+        totalCredits: input.totalCredits,
+        tuitionFeePerTerm: input.tuitionFeePerTerm ?? null,
+        careerPaths: input.careerPaths,
+        admissionLink: input.admissionLink || null,
+        curriculumPdfUrl: input.curriculumPdfUrl || null,
+        descriptionTh: input.descriptionTh || null,
+        descriptionEn: input.descriptionEn || null,
+        status: input.status,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId,
+        action: "curriculum.create",
+        entity: "academic_program",
+        entityId: item.id,
+        after: { code: item.code, nameTh: item.nameTh, degreeLevel: item.degreeLevel },
+      },
+    });
+
+    return item;
   });
 
   return {
@@ -136,27 +151,42 @@ export async function createProgram(tenantId: string, input: CreateProgramInput)
   };
 }
 
-export async function updateProgram(tenantId: string, input: UpdateProgramInput): Promise<AcademicProgramDto> {
-  const updated = await prisma.academicProgram.update({
-    where: { id: input.id, tenantId },
-    data: {
-      code: input.code,
-      nameTh: input.nameTh,
-      nameEn: input.nameEn,
-      degreeTh: input.degreeTh,
-      degreeEn: input.degreeEn,
-      degreeLevel: input.degreeLevel,
-      department: input.department,
-      durationYears: input.durationYears,
-      totalCredits: input.totalCredits,
-      tuitionFeePerTerm: input.tuitionFeePerTerm,
-      careerPaths: input.careerPaths,
-      admissionLink: input.admissionLink || null,
-      curriculumPdfUrl: input.curriculumPdfUrl || null,
-      descriptionTh: input.descriptionTh,
-      descriptionEn: input.descriptionEn,
-      status: input.status,
-    },
+export async function updateProgram(tenantId: string, actorId: string, input: UpdateProgramInput): Promise<AcademicProgramDto> {
+  const updated = await prisma.$transaction(async (tx) => {
+    const item = await tx.academicProgram.update({
+      where: { id: input.id, tenantId },
+      data: {
+        code: input.code,
+        nameTh: input.nameTh,
+        nameEn: input.nameEn,
+        degreeTh: input.degreeTh,
+        degreeEn: input.degreeEn,
+        degreeLevel: input.degreeLevel,
+        department: input.department,
+        durationYears: input.durationYears,
+        totalCredits: input.totalCredits,
+        tuitionFeePerTerm: input.tuitionFeePerTerm,
+        careerPaths: input.careerPaths,
+        admissionLink: input.admissionLink || null,
+        curriculumPdfUrl: input.curriculumPdfUrl || null,
+        descriptionTh: input.descriptionTh,
+        descriptionEn: input.descriptionEn,
+        status: input.status,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId,
+        action: "curriculum.update",
+        entity: "academic_program",
+        entityId: item.id,
+        after: { code: item.code, nameTh: item.nameTh, status: item.status },
+      },
+    });
+
+    return item;
   });
 
   return {
@@ -183,8 +213,27 @@ export async function updateProgram(tenantId: string, input: UpdateProgramInput)
   };
 }
 
-export async function deleteProgram(tenantId: string, id: string): Promise<void> {
-  await prisma.academicProgram.delete({
-    where: { id, tenantId },
+export async function deleteProgram(tenantId: string, actorId: string, id: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.academicProgram.findUnique({
+      where: { id, tenantId },
+      select: { code: true, nameTh: true },
+    });
+
+    await tx.academicProgram.delete({
+      where: { id, tenantId },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId,
+        action: "curriculum.delete",
+        entity: "academic_program",
+        entityId: id,
+        before: existing ? { code: existing.code, nameTh: existing.nameTh } : undefined,
+      },
+    });
   });
 }
+

@@ -30,7 +30,7 @@ export async function updateNewsAction(input: unknown): Promise<ActionResult<New
   return runAction(async () => {
     const ctx = await requirePermission(NEWS_P.newsManage);
     const parsed = updateNewsSchema.parse(input, { error: zodErrorMap(await getLocale()) });
-    const result = await updateNews(ctx.tenantId, parsed);
+    const result = await updateNews(ctx.tenantId, ctx.userId, parsed);
     revalidatePath("/news");
     return result;
   });
@@ -39,7 +39,8 @@ export async function updateNewsAction(input: unknown): Promise<ActionResult<New
 export async function deleteNewsAction(id: string): Promise<ActionResult<void>> {
   return runAction(async () => {
     const ctx = await requirePermission(NEWS_P.newsManage);
-    await deleteNews(ctx.tenantId, id);
+    await deleteNews(ctx.tenantId, ctx.userId, id);
     revalidatePath("/news");
   });
 }
+

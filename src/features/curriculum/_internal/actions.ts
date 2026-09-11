@@ -20,7 +20,7 @@ export async function createProgramAction(input: unknown): Promise<ActionResult<
   return runAction(async () => {
     const ctx = await requirePermission(CURRICULUM_P.curriculumManage);
     const parsed = createProgramSchema.parse(input, { error: zodErrorMap(await getLocale()) });
-    const result = await createProgram(ctx.tenantId, parsed);
+    const result = await createProgram(ctx.tenantId, ctx.userId, parsed);
     revalidatePath("/curriculum");
     return result;
   });
@@ -30,7 +30,7 @@ export async function updateProgramAction(input: unknown): Promise<ActionResult<
   return runAction(async () => {
     const ctx = await requirePermission(CURRICULUM_P.curriculumManage);
     const parsed = updateProgramSchema.parse(input, { error: zodErrorMap(await getLocale()) });
-    const result = await updateProgram(ctx.tenantId, parsed);
+    const result = await updateProgram(ctx.tenantId, ctx.userId, parsed);
     revalidatePath("/curriculum");
     return result;
   });
@@ -39,7 +39,8 @@ export async function updateProgramAction(input: unknown): Promise<ActionResult<
 export async function deleteProgramAction(id: string): Promise<ActionResult<void>> {
   return runAction(async () => {
     const ctx = await requirePermission(CURRICULUM_P.curriculumManage);
-    await deleteProgram(ctx.tenantId, id);
+    await deleteProgram(ctx.tenantId, ctx.userId, id);
     revalidatePath("/curriculum");
   });
 }
+

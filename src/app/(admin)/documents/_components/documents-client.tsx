@@ -72,6 +72,7 @@ export function DocumentsClient({ initialItems, currentUserId, canApprove, canMa
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [detailModalItem, setDetailModalItem] = useState<DocumentRequestDto | null>(null);
   const [approvalModalItem, setApprovalModalItem] = useState<DocumentRequestDto | null>(null);
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState<DocumentRequestDto | null>(null);
   const [approvalAction, setApprovalAction] = useState<"APPROVE" | "RETURN" | "REJECT">("APPROVE");
   const [approvalComment, setApprovalComment] = useState("");
 
@@ -182,12 +183,12 @@ export function DocumentsClient({ initialItems, currentUserId, canApprove, canMa
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm(t("common.confirmDelete"))) return;
+  const handleDelete = (item: DocumentRequestDto) => {
     startTransition(async () => {
-      const res = await deleteDocumentRequestAction(id);
+      const res = await deleteDocumentRequestAction(item.id);
       if (res.ok) {
-        setItems((prev) => prev.filter((it) => it.id !== id));
+        setItems((prev) => prev.filter((it) => it.id !== item.id));
+        setDeleteConfirmItem(null);
         toast.success(t("common.delete"));
       } else {
         toast.error(t("common.error"));
@@ -356,7 +357,7 @@ export function DocumentsClient({ initialItems, currentUserId, canApprove, canMa
               )}
 
               {canManage && (
-                <RowMenuItem onSelect={() => handleDelete(row.id)} danger>
+                <RowMenuItem onSelect={() => setDeleteConfirmItem(row)} danger>
                   <XCircle className="h-4 w-4 mr-2" />
                   <span>{t("common.delete")}</span>
                 </RowMenuItem>
@@ -590,6 +591,28 @@ export function DocumentsClient({ initialItems, currentUserId, canApprove, canMa
           </Button>
         </LiyonDialogFooter>
       </LiyonDialog>
+
+      {/* Dialog ยืนยันการลบเอกสาร */}
+      <LiyonDialog open={!!deleteConfirmItem} onOpenChange={(open) => !open && setDeleteConfirmItem(null)} danger>
+        <LiyonDialogHeader
+          title={t("common.delete")}
+          description={t("common.confirmDelete")}
+        />
+        <LiyonDialogBody>
+          <p className="text-sm text-muted-foreground">
+            {deleteConfirmItem?.docNumber ? `${deleteConfirmItem.docNumber} - ` : ""}{deleteConfirmItem?.title}
+          </p>
+        </LiyonDialogBody>
+        <LiyonDialogFooter>
+          <Button variant="outline" onClick={() => setDeleteConfirmItem(null)} disabled={isPending}>
+            {t("common.cancel")}
+          </Button>
+          <Button variant="destructive" onClick={() => deleteConfirmItem && handleDelete(deleteConfirmItem)} disabled={isPending}>
+            {t("common.delete")}
+          </Button>
+        </LiyonDialogFooter>
+      </LiyonDialog>
     </div>
   );
 }
+

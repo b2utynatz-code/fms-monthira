@@ -6,6 +6,14 @@ import { prisma } from "@/shared/lib/infra/prisma";
  * 
  * ช่วงเวลาทับซ้อนกันเมื่อ: start_time < new_end_time AND end_time > new_start_time
  */
+export function isTimeOverlapping(
+  existing: { startTime: Date; endTime: Date },
+  target: { startTime: Date; endTime: Date }
+): boolean {
+  return existing.startTime.getTime() < target.endTime.getTime() &&
+    existing.endTime.getTime() > target.startTime.getTime();
+}
+
 export async function checkBookingConflict(params: {
   tenantId: string;
   resourceId: string;

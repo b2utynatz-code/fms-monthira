@@ -67,28 +67,43 @@ export async function listFacultyMembers(tenantId: string, options?: { departmen
   }));
 }
 
-export async function createFacultyMember(tenantId: string, input: CreateStaffInput): Promise<FacultyMemberDto> {
-  const created = await prisma.facultyMember.create({
-    data: {
-      tenantId,
-      titleTh: input.titleTh,
-      titleEn: input.titleEn,
-      firstNameTh: input.firstNameTh,
-      lastNameTh: input.lastNameTh,
-      firstNameEn: input.firstNameEn,
-      lastNameEn: input.lastNameEn,
-      academicPosition: input.academicPosition,
-      adminPositionTh: input.adminPositionTh || null,
-      adminPositionEn: input.adminPositionEn || null,
-      department: input.department,
-      email: input.email,
-      phoneExt: input.phoneExt || null,
-      roomNumber: input.roomNumber || null,
-      avatarUrl: input.avatarUrl || null,
-      expertise: input.expertise,
-      orderIndex: input.orderIndex,
-      isActive: input.isActive,
-    },
+export async function createFacultyMember(tenantId: string, actorId: string, input: CreateStaffInput): Promise<FacultyMemberDto> {
+  const created = await prisma.$transaction(async (tx) => {
+    const item = await tx.facultyMember.create({
+      data: {
+        tenantId,
+        titleTh: input.titleTh,
+        titleEn: input.titleEn,
+        firstNameTh: input.firstNameTh,
+        lastNameTh: input.lastNameTh,
+        firstNameEn: input.firstNameEn,
+        lastNameEn: input.lastNameEn,
+        academicPosition: input.academicPosition,
+        adminPositionTh: input.adminPositionTh || null,
+        adminPositionEn: input.adminPositionEn || null,
+        department: input.department,
+        email: input.email,
+        phoneExt: input.phoneExt || null,
+        roomNumber: input.roomNumber || null,
+        avatarUrl: input.avatarUrl || null,
+        expertise: input.expertise,
+        orderIndex: input.orderIndex,
+        isActive: input.isActive,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId,
+        action: "staff.create",
+        entity: "faculty_member",
+        entityId: item.id,
+        after: { name: `${item.titleTh} ${item.firstNameTh} ${item.lastNameTh}`, department: item.department },
+      },
+    });
+
+    return item;
   });
 
   return {
@@ -119,28 +134,43 @@ export async function createFacultyMember(tenantId: string, input: CreateStaffIn
   };
 }
 
-export async function updateFacultyMember(tenantId: string, input: UpdateStaffInput): Promise<FacultyMemberDto> {
-  const updated = await prisma.facultyMember.update({
-    where: { id: input.id, tenantId },
-    data: {
-      titleTh: input.titleTh,
-      titleEn: input.titleEn,
-      firstNameTh: input.firstNameTh,
-      lastNameTh: input.lastNameTh,
-      firstNameEn: input.firstNameEn,
-      lastNameEn: input.lastNameEn,
-      academicPosition: input.academicPosition,
-      adminPositionTh: input.adminPositionTh,
-      adminPositionEn: input.adminPositionEn,
-      department: input.department,
-      email: input.email,
-      phoneExt: input.phoneExt,
-      roomNumber: input.roomNumber,
-      avatarUrl: input.avatarUrl || null,
-      expertise: input.expertise,
-      orderIndex: input.orderIndex,
-      isActive: input.isActive,
-    },
+export async function updateFacultyMember(tenantId: string, actorId: string, input: UpdateStaffInput): Promise<FacultyMemberDto> {
+  const updated = await prisma.$transaction(async (tx) => {
+    const item = await tx.facultyMember.update({
+      where: { id: input.id, tenantId },
+      data: {
+        titleTh: input.titleTh,
+        titleEn: input.titleEn,
+        firstNameTh: input.firstNameTh,
+        lastNameTh: input.lastNameTh,
+        firstNameEn: input.firstNameEn,
+        lastNameEn: input.lastNameEn,
+        academicPosition: input.academicPosition,
+        adminPositionTh: input.adminPositionTh,
+        adminPositionEn: input.adminPositionEn,
+        department: input.department,
+        email: input.email,
+        phoneExt: input.phoneExt,
+        roomNumber: input.roomNumber,
+        avatarUrl: input.avatarUrl || null,
+        expertise: input.expertise,
+        orderIndex: input.orderIndex,
+        isActive: input.isActive,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId,
+        action: "staff.update",
+        entity: "faculty_member",
+        entityId: item.id,
+        after: { name: `${item.titleTh} ${item.firstNameTh} ${item.lastNameTh}`, department: item.department },
+      },
+    });
+
+    return item;
   });
 
   return {
@@ -171,8 +201,27 @@ export async function updateFacultyMember(tenantId: string, input: UpdateStaffIn
   };
 }
 
-export async function deleteFacultyMember(tenantId: string, id: string): Promise<void> {
-  await prisma.facultyMember.delete({
-    where: { id, tenantId },
+export async function deleteFacultyMember(tenantId: string, actorId: string, id: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.facultyMember.findUnique({
+      where: { id, tenantId },
+      select: { titleTh: true, firstNameTh: true, lastNameTh: true },
+    });
+
+    await tx.facultyMember.delete({
+      where: { id, tenantId },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId,
+        actorId,
+        action: "staff.delete",
+        entity: "faculty_member",
+        entityId: id,
+        before: existing ? { name: `${existing.titleTh} ${existing.firstNameTh} ${existing.lastNameTh}` } : undefined,
+      },
+    });
   });
 }
+
