@@ -63,3 +63,15 @@ export const resolvePalette = cache(async (): Promise<PaletteId> => {
     return DEFAULT_PALETTE;
   }
 });
+
+/** ดึงการตั้งค่า tenant สำหรับ layout (โลโก้, ชื่อองค์กร, โทนสี) — ไม่ throw */
+export const resolveTenantSettings = cache(async (): Promise<TenantSettings | null> => {
+  try {
+    const tenantId = (await sessionTenantId()) || (await prisma.tenant.findFirst({ orderBy: { createdAt: "asc" }, select: { id: true } }))?.id;
+    if (!tenantId) return null;
+    return readTenantSettings(tenantId, prisma);
+  } catch {
+    return null;
+  }
+});
+

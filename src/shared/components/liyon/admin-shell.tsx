@@ -27,6 +27,8 @@ export interface AdminShellProps {
   brandName: string;
   brandTagline: string;
   brandHref: string;
+  brandLogo?: string | null;
+
   /** ชื่อหน้าปัจจุบัน (`.tenant` ใน navbar) — ว่างได้ถ้าหาไม่เจอ (ไม่ fallback เป็นค่าปลอม) */
   /** breadcrumb บน navbar — ขั้นสุดท้ายเป็น span[aria-current=page] (h1 เป็นของหัวหน้าในเนื้อหา) ขั้นก่อนหน้าเป็นลิงก์ · ว่าง = ไม่แสดง */
   breadcrumb: Crumb[];
@@ -86,6 +88,7 @@ export function AdminShell({
   brandName,
   brandTagline,
   brandHref,
+  brandLogo,
   breadcrumb,
   breadcrumbLabel,
   roleLabel,
@@ -113,10 +116,19 @@ export function AdminShell({
       <header className="adm-head">
         <Link className="brand-blk" href={brandHref}>
           <i>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M22 10 12 5 2 10l10 5 10-5Z" />
-              <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
-            </svg>
+            {brandLogo ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={brandLogo}
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "inherit" }}
+              />
+            ) : (
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M22 10 12 5 2 10l10 5 10-5Z" />
+                <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
+              </svg>
+            )}
           </i>
           <div className="t">
             <b>{brandName}</b>

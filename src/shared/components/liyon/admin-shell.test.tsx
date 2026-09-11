@@ -144,4 +144,16 @@ describe("AdminShell", () => {
     );
     expect(screen.getByText("3")).toBeTruthy();
   });
+
+  it("เมื่อส่ง brandLogo จะแสดงแท็ก img แทน svg ใน brand-blk", () => {
+    const { container } = render(
+      <AdminShell
+        {...baseProps({ brandLogo: "/uploads/logos/fms-logo.png" })}
+      />,
+    );
+    const img = container.querySelector(".brand-blk i img");
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute("src")).toBe("/uploads/logos/fms-logo.png");
+  });
 });
+
