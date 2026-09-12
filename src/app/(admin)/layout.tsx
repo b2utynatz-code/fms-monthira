@@ -12,6 +12,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               nameTh: tenant.nameTh,
               nameEn: tenant.nameEn,
               logoUrl: tenant.logoUrl,
+              statement: tenant.statement,
             }
           : null
       }

@@ -21,6 +21,10 @@ export async function updateSettingsAction(input: unknown): Promise<ActionResult
     const ctx = await requirePermission(P.settingsManage);
     await updateTenantSettings({ tenantId: ctx.tenantId, actorId: ctx.userId, ...updateSettingsSchema.parse(input, { error: zodErrorMap(await getLocale()) }) });
     revalidatePath("/", "layout"); // data-palette บน <html> อ่านใหม่
+    revalidatePath("/settings");
+    revalidatePath("/portal");
+    revalidatePath("/(admin)", "layout");
+    revalidatePath("/(portal)", "layout");
   });
 }
 
