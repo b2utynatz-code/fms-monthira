@@ -37,6 +37,7 @@ interface CurriculumClientProps {
   initialItems: AcademicProgramDto[];
   initialDepartments: AcademicDepartmentDto[];
   canManage: boolean;
+  defaultTab?: "programs" | "departments";
 }
 
 const LEVEL_MAP = {
@@ -57,12 +58,13 @@ export function CurriculumClient({
   initialItems,
   initialDepartments,
   canManage,
+  defaultTab = "programs",
 }: CurriculumClientProps) {
   const t = useT();
   const locale = useLocale();
 
   // Tab State: "programs" | "departments"
-  const [activeTab, setActiveTab] = useState<"programs" | "departments">("programs");
+  const [activeTab, setActiveTab] = useState<"programs" | "departments">(defaultTab);
 
   const [items, setItems] = useState<AcademicProgramDto[]>(initialItems);
   const [departments, setDepartments] = useState<AcademicDepartmentDto[]>(initialDepartments);

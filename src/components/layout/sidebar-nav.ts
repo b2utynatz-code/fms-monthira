@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Settings, Layers, Newspaper, GraduationCap, BookOpen, FileText, CalendarDays, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Users, Settings, Layers, Newspaper, GraduationCap, BookOpen, Building2, FileText, CalendarDays, type LucideIcon } from "lucide-react";
 import { hasPermission, P } from "@/features/identity";
 import { SAMPLE_P } from "@/features/sample";
 import { NEWS_P } from "@/features/news";
@@ -27,6 +27,7 @@ export const sidebarGroups: NavGroup[] = [
       { title: "news.nav", href: "/news", icon: Newspaper, permission: NEWS_P.newsRead },
       { title: "staff.nav", href: "/staff", icon: GraduationCap, permission: STAFF_P.staffRead },
       { title: "curriculum.nav", href: "/curriculum", icon: BookOpen, permission: CURRICULUM_P.curriculumRead },
+      { title: "curriculum.tab.departments", href: "/curriculum/departments", icon: Building2, permission: CURRICULUM_P.curriculumRead },
       { title: "documents.nav", href: "/documents", icon: FileText, permission: DOCUMENTS_P.documentSubmit },
       { title: "bookings.nav", href: "/bookings", icon: CalendarDays, permission: BOOKING_P.bookingView },
     ],
