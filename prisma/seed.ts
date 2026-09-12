@@ -16,6 +16,8 @@ async function main() {
     process.exit(1);
   }
   const core = await seedCore(prisma, { tenantCode: "DEMO", nameTh: "องค์กรตัวอย่าง", nameEn: "Sample Organization" });
+  await prisma.auditLog.deleteMany();
+  await prisma.tenant.update({ where: { id: core.tenantId }, data: { settings: { palette: "blue" } } });
   const hash = await bcrypt.hash(DEV_PASSWORD, 12);
   const users = [
     { email: "admin@app.local", name: "ผู้ดูแลสูงสุด", roles: ["SUPER_ADMIN"] },

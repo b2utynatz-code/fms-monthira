@@ -23,7 +23,7 @@ test("สร้างผู้ใช้ → เปิดลิงก์ → ต�
   await expect(p2.getByText(/ตั้งรหัสผ่านเรียบร้อย/)).toBeVisible();
   await loginAs(p2, email, "NewUser123!");
   await p2.waitForURL("**/dashboard");
-  await expect(p2.getByRole("link", { name: "ผู้ใช้" })).toBeVisible();
+  await expect(p2.getByRole("link", { name: "ผู้ใช้", exact: true })).toBeVisible();
   await expect(p2.getByRole("link", { name: "บทบาท" })).toHaveCount(0);
   await expect(p2.getByRole("link", { name: "ตั้งค่าองค์กร" })).toHaveCount(0);
   await ctx.close();

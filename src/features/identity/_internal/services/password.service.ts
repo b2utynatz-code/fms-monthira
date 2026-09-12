@@ -7,6 +7,7 @@ import { asLocale } from "@/shared/lib/i18n/config";
 import { logger } from "@/shared/lib/infra/logger";
 import { issueToken, consumeToken, TOKEN_TTL } from "../tokens";
 import { passwordResetEmail } from "../email-templates";
+import { getTenantRawSmtp } from "./tenant.service";
 import { writeAudit } from "../audit";
 import { throttleKeys, isLoginThrottled, recordLoginFailure } from "../throttle";
 
@@ -43,9 +44,24 @@ export async function requestPasswordReset(email: string): Promise<void> {
   await recordLoginFailure(keys); // ที่นี่นับ "จำนวนคำขอ" ไม่ใช่ "จำนวนที่ผิดพลาด" — ทุกคำขอนับเสมอ
   const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
   if (!user || !user.isActive) return;
+  const ut = await prisma.userTenant.findFirst({ where: { userId: user.id }, select: { tenantId: true } });
+  let smtp = null;
+  if (ut) {
+    const s = await getTenantRawSmtp(ut.tenantId);
+    if (s && s.enabled && s.host && s.user) {
+      smtp = {
+        host: s.host,
+        port: s.port,
+        secure: s.secure,
+        user: s.user,
+        pass: s.pass,
+        from: s.fromEmail ? (s.fromName ? `"${s.fromName}" <${s.fromEmail}>` : s.fromEmail) : (s.fromName ? `"${s.fromName}" <${s.user}>` : undefined),
+      };
+    }
+  }
   const { raw } = await issueToken({ userId: user.id, purpose: "PASSWORD_RESET", ttlMs: TOKEN_TTL.PASSWORD_RESET });
   const mail = passwordResetEmail(asLocale(user.locale), { name: user.name, link: resetLink(raw), hours: 1 });
-  void sendMail({ to: user.email, ...mail }).catch((err: unknown) => {
+  void sendMail({ to: user.email, ...mail, smtp }).catch((err: unknown) => {
     logger.error("password reset mail failed", { err: err instanceof Error ? err.message : String(err) });
   });
 }

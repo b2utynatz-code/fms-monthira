@@ -39,3 +39,14 @@ test("VIEWER เปิด /settings ตรง ๆ เห็นข้อควา
   await expect(p.getByText(/เกิดข้อผิดพลาดภายในระบบ/)).toHaveCount(0);
   await ctx.close();
 });
+
+test("หน้า settings แสดงส่วนตั้งค่า SMTP Gmail และสามารถกรอกข้อมูลได้", async ({ page }) => {
+  await page.goto("/settings");
+  await expect(page.getByText(/การตั้งค่าอีเมล \(SMTP Gmail\)/)).toBeVisible();
+  await expect(page.locator("#s-smtp-enabled")).toBeVisible();
+  await expect(page.locator("#s-smtp-user")).toBeVisible();
+  await expect(page.locator("#s-smtp-pass")).toBeVisible();
+  await expect(page.getByText(/คำแนะนำการใช้งาน Google App Password/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /ส่งอีเมลทดสอบ/ })).toBeVisible();
+});
+

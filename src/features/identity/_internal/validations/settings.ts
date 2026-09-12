@@ -1,6 +1,50 @@
 import { z } from "zod";
 import { PALETTE_IDS } from "@/shared/lib/palette";
 
+export const smtpSettingsSchema = z
+  .object({
+    enabled: z.boolean().default(false),
+    service: z.enum(["gmail", "custom"]).default("gmail"),
+    host: z.string().trim().default("smtp.gmail.com"),
+    port: z.coerce.number().int().min(1).max(65535).default(587),
+    secure: z.boolean().default(false),
+    user: z.string().trim().default(""),
+    pass: z.string().trim().default(""),
+    fromName: z.string().trim().max(255).default(""),
+    fromEmail: z.string().trim().default(""),
+  })
+  .superRefine((data, ctx) => {
+    if (data.enabled) {
+      if (!data.user || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.user)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "กรุณากรอกอีเมล Gmail ให้ถูกต้อง",
+          path: ["user"],
+        });
+      }
+      if (!data.host) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "กรุณากรอก SMTP Host",
+          path: ["host"],
+        });
+      }
+    }
+  });
+
+export const testSmtpSchema = z.object({
+  toEmail: z.string().trim().email("กรุณากรอกอีเมลผู้รับให้ถูกต้อง"),
+  smtp: z.object({
+    host: z.string().trim().min(1, "กรุณากรอก SMTP Host").default("smtp.gmail.com"),
+    port: z.coerce.number().int().min(1).max(65535).default(587),
+    secure: z.boolean().default(false),
+    user: z.string().trim().email("กรุณากรอกอีเมล Gmail ให้ถูกต้อง"),
+    pass: z.string().trim().optional().default(""),
+    fromName: z.string().trim().optional().default(""),
+    fromEmail: z.string().trim().optional().default(""),
+  }),
+});
+
 export const updateSettingsSchema = z.object({
   nameTh: z.string().trim().min(1).max(255),
   nameEn: z.string().trim().min(1).max(255),
@@ -14,7 +58,11 @@ export const updateSettingsSchema = z.object({
     )
     .default(""),
   palette: z.enum(PALETTE_IDS),
+  smtp: smtpSettingsSchema.optional(),
 });
 export const updateProfileSchema = z.object({ name: z.string().trim().min(1).max(255), locale: z.enum(["th", "en"]) });
+export type SmtpSettingsInput = z.infer<typeof smtpSettingsSchema>;
+export type TestSmtpInput = z.infer<typeof testSmtpSchema>;
 export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+

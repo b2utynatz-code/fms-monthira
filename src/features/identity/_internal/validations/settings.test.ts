@@ -59,4 +59,56 @@ describe("updateSettingsSchema", () => {
       expect(result.data.logoUrl).toBe("");
     }
   });
+
+  it("should accept valid smtp settings when enabled", () => {
+    const result = updateSettingsSchema.safeParse({
+      nameTh: "คณะการจัดการ",
+      nameEn: "Faculty of Management Sciences",
+      palette: "blue",
+      smtp: {
+        enabled: true,
+        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        user: "admin@gmail.com",
+        pass: "abcd efgh ijkl mnop",
+        fromName: "คณะการจัดการ",
+        fromEmail: "admin@gmail.com",
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should reject smtp settings when enabled but user email is invalid", () => {
+    const result = updateSettingsSchema.safeParse({
+      nameTh: "คณะการจัดการ",
+      nameEn: "Faculty of Management Sciences",
+      palette: "blue",
+      smtp: {
+        enabled: true,
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        user: "not-an-email",
+        pass: "abcd efgh ijkl mnop",
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should accept smtp settings with empty user when disabled", () => {
+    const result = updateSettingsSchema.safeParse({
+      nameTh: "คณะการจัดการ",
+      nameEn: "Faculty of Management Sciences",
+      palette: "blue",
+      smtp: {
+        enabled: false,
+        user: "",
+        pass: "",
+      },
+    });
+    expect(result.success).toBe(true);
+  });
 });
+

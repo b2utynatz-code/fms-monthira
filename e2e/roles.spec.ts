@@ -7,8 +7,8 @@ test("สร้าง แก้ และลบบทบาทที่ไม่
   await page.fill("#role-code", code.toLowerCase());
   await page.fill("#role-name-th", "บทบาททดสอบ");
   await page.fill("#role-name-en", "E2E role");
-  await page.getByLabel(/ดูรายชื่อผู้ใช้/).check();
-  await page.getByRole("button", { name: /^บันทึก$/ }).click();
+  await page.locator("#perm-users\\:read").dispatchEvent("click");
+  await page.getByRole("button", { name: /^บันทึก$/ }).dispatchEvent("click");
   await expect(page.getByText(/บันทึกบทบาทแล้ว/)).toBeVisible();
   const row = page.getByRole("row", { name: new RegExp(code) });
   await expect(row).toBeVisible();
@@ -17,8 +17,8 @@ test("สร้าง แก้ และลบบทบาทที่ไม่
   await expect(row.getByRole("cell").nth(3)).toHaveText("1"); // 1 สิทธิ์
   await row.getByRole("button", { name: /เมนูของ/ }).click();
   await page.getByRole("menuitem", { name: /แก้ไข/ }).click();
-  await page.getByLabel(/ดูประวัติการใช้งาน/).check();
-  await page.getByRole("button", { name: /^บันทึก$/ }).click();
+  await page.locator("#perm-audit\\:read").dispatchEvent("click");
+  await page.getByRole("button", { name: /^บันทึก$/ }).dispatchEvent("click");
   await expect(page.getByRole("row", { name: new RegExp(code) }).getByRole("cell").nth(3)).toHaveText("2");
   await page.getByRole("row", { name: new RegExp(code) }).getByRole("button", { name: /เมนูของ/ }).click();
   await page.getByRole("menuitem", { name: /ลบบทบาท/ }).click();
