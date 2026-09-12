@@ -13,3 +13,5 @@ e2e/.auth/
 .superpowers/
 public/uploads/*
 !public/uploads/**/.gitkeep
+!public/uploads/logos/
+!public/uploads/logos/mcu-logo.*
