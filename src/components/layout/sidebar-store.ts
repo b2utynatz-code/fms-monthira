@@ -17,10 +17,13 @@ import { persist } from "zustand/middleware";
 interface SidebarState {
   collapsed: boolean;
   openGroup: string | null;
+  openGroups: string[];
 
   toggleCollapsed: () => void;
   setCollapsed: (collapsed: boolean) => void;
   setOpenGroup: (href: string | null) => void;
+  toggleGroup: (href: string) => void;
+  setGroupOpen: (href: string, open: boolean) => void;
 }
 
 export const useSidebarStore = create<SidebarState>()(
@@ -28,18 +31,33 @@ export const useSidebarStore = create<SidebarState>()(
     (set) => ({
       collapsed: false,
       openGroup: null,
+      openGroups: ["/curriculum", "/users"],
 
       toggleCollapsed: () =>
         set((s) => ({ collapsed: !s.collapsed })),
       setCollapsed: (collapsed) => set({ collapsed }),
       setOpenGroup: (href) => set({ openGroup: href }),
+      toggleGroup: (href) =>
+        set((s) => ({
+          openGroups: (s.openGroups ?? []).includes(href)
+            ? (s.openGroups ?? []).filter((h) => h !== href)
+            : [...(s.openGroups ?? []), href],
+        })),
+      setGroupOpen: (href, open) =>
+        set((s) => ({
+          openGroups: open
+            ? (s.openGroups ?? []).includes(href)
+              ? s.openGroups
+              : [...(s.openGroups ?? []), href]
+            : (s.openGroups ?? []).filter((h) => h !== href),
+        })),
     }),
     {
       name: "sidebar-state",
       // Only persist these keys — exclude action functions
       partialize: (s) => ({
         collapsed: s.collapsed,
-        openGroup: s.openGroup,
+        openGroups: s.openGroups,
       }),
     },
   ),
