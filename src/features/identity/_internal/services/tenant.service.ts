@@ -189,8 +189,16 @@ async function sessionTenantId(): Promise<string | null> {
 /** ใช้โดย root layout ทุก request — tenant จาก session ถ้ามี ไม่งั้น tenant แรก (หน้า login ยังไม่มี session) · ไม่ throw */
 export const resolvePalette = cache(async (): Promise<PaletteId> => {
   try {
-    const tenantId = (await sessionTenantId()) || (await prisma.tenant.findFirst({ orderBy: { createdAt: "asc" }, select: { id: true } }))?.id;
-    return tenantId ? await getTenantPalette(tenantId) : DEFAULT_PALETTE;
+    const sessionTid = await sessionTenantId();
+    if (sessionTid) {
+      try {
+        return await getTenantPalette(sessionTid);
+      } catch {
+        // stale session tenantId
+      }
+    }
+    const defaultTenant = await prisma.tenant.findFirst({ orderBy: { createdAt: "asc" }, select: { id: true } });
+    return defaultTenant ? await getTenantPalette(defaultTenant.id) : DEFAULT_PALETTE;
   } catch {
     return DEFAULT_PALETTE;
   }
@@ -199,9 +207,17 @@ export const resolvePalette = cache(async (): Promise<PaletteId> => {
 /** ดึงการตั้งค่า tenant สำหรับ layout (โลโก้, ชื่อองค์กร, โทนสี) — ไม่ throw */
 export const resolveTenantSettings = cache(async (): Promise<TenantSettings | null> => {
   try {
-    const tenantId = (await sessionTenantId()) || (await prisma.tenant.findFirst({ orderBy: { createdAt: "asc" }, select: { id: true } }))?.id;
-    if (!tenantId) return null;
-    return readTenantSettings(tenantId, prisma);
+    const sessionTid = await sessionTenantId();
+    if (sessionTid) {
+      try {
+        return await readTenantSettings(sessionTid, prisma);
+      } catch {
+        // stale session tenantId, fallback to default tenant
+      }
+    }
+    const defaultTenant = await prisma.tenant.findFirst({ orderBy: { createdAt: "asc" }, select: { id: true } });
+    if (!defaultTenant) return null;
+    return await readTenantSettings(defaultTenant.id, prisma);
   } catch {
     return null;
   }
