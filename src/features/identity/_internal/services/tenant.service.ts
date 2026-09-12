@@ -43,6 +43,17 @@ export interface GeminiRawSettings {
   model: string;
 }
 
+export interface OrgStatementSettings {
+  sloganTh: string;
+  sloganEn: string;
+  visionTh: string;
+  visionEn: string;
+  missionTh: string;
+  missionEn: string;
+  valuesTh: string;
+  valuesEn: string;
+}
+
 export interface TenantSettings {
   code: string;
   nameTh: string;
@@ -52,6 +63,7 @@ export interface TenantSettings {
   smtp?: SmtpSettings;
   contact?: ContactSettings;
   gemini?: GeminiClientSettings;
+  statement?: OrgStatementSettings;
 }
 
 async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSettings> {
@@ -97,6 +109,18 @@ async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSetti
     model: rawGemini?.model || "gemini-2.5-flash",
   };
 
+  const rawStmt = (raw as { statement?: Partial<OrgStatementSettings> }).statement;
+  const statement: OrgStatementSettings = {
+    sloganTh: rawStmt?.sloganTh ?? "มุ่งมั่นสู่ความเป็นเลิศทางวิชาการและการจัดการระดับสากล",
+    sloganEn: rawStmt?.sloganEn ?? "Striving for Academic Excellence and Global Management Standards",
+    visionTh: rawStmt?.visionTh ?? "เป็นสถาบันการศึกษาชั้นนำด้านการจัดการที่ผลิตบัณฑิตคุณภาพและสร้างองค์ความรู้ที่ตอบสนองการพัฒนาสังคมและประเทศ",
+    visionEn: rawStmt?.visionEn ?? "To be a leading academic institution in management sciences, producing global graduates and impactful research for sustainable development.",
+    missionTh: rawStmt?.missionTh ?? "1. จัดการศึกษาเพื่อพัฒนาผู้เรียนให้มีสมรรถนะระดับสากลและคุณธรรม\n2. ผลิตผลงานวิจัยและนวัตกรรมเพื่อการพัฒนาชุมชนและสังคม\n3. ให้บริการวิชาการและสืบสานทำนุบำรุงศิลปวัฒนธรรม",
+    missionEn: rawStmt?.missionEn ?? "1. Provide high-quality education fostering global competencies and ethics.\n2. Produce impactful research and innovations addressing societal needs.\n3. Deliver academic services and cultivate cultural preservation.",
+    valuesTh: rawStmt?.valuesTh ?? "คุณธรรม นวัตกรรม มุ่งมั่นสู่ความเป็นเลิศ และความรับผิดชอบต่อสังคม (Integrity, Innovation, Excellence, Social Responsibility)",
+    valuesEn: rawStmt?.valuesEn ?? "Integrity, Innovation, Excellence, and Social Responsibility (IIES)",
+  };
+
   return {
     code: t.code,
     nameTh: t.nameTh,
@@ -106,6 +130,7 @@ async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSetti
     smtp,
     contact,
     gemini,
+    statement,
   };
 }
 
@@ -188,6 +213,7 @@ export async function updateTenantSettings(input: { tenantId: string; actorId: s
       ...(newSmtp ? { smtp: newSmtp } : {}),
       ...(input.contact ? { contact: input.contact } : {}),
       ...(newGemini ? { gemini: newGemini } : {}),
+      ...(input.statement ? { statement: input.statement } : {}),
     };
 
     await tx.tenant.update({

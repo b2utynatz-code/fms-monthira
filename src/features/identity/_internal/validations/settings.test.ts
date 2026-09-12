@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { updateSettingsSchema } from "./settings";
+import { updateSettingsSchema, orgStatementSchema } from "./settings";
 
 describe("updateSettingsSchema", () => {
   it("should accept valid settings with empty logoUrl", () => {
@@ -180,6 +180,56 @@ describe("updateSettingsSchema", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.gemini?.model).toBe("gemini-2.5-flash");
+    }
+  });
+
+  it("should accept valid world-standard organization statements", () => {
+    const result = updateSettingsSchema.safeParse({
+      nameTh: "คณะการจัดการ",
+      nameEn: "Faculty of Management Sciences",
+      palette: "blue",
+      statement: {
+        sloganTh: "มุ่งมั่นสู่ความเป็นเลิศทางวิชาการ",
+        sloganEn: "Striving for Academic Excellence",
+        visionTh: "เป็นสถาบันชั้นนำระดับสากล",
+        visionEn: "To be a leading global institution",
+        missionTh: "ผลิตบัณฑิตคุณภาพสูง",
+        missionEn: "Produce high quality graduates",
+        valuesTh: "คุณธรรมและนวัตกรรม",
+        valuesEn: "Integrity and Innovation",
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.statement?.sloganTh).toBe("มุ่งมั่นสู่ความเป็นเลิศทางวิชาการ");
+      expect(result.data.statement?.sloganEn).toBe("Striving for Academic Excellence");
+      expect(result.data.statement?.visionTh).toBe("เป็นสถาบันชั้นนำระดับสากล");
+      expect(result.data.statement?.visionEn).toBe("To be a leading global institution");
+    }
+  });
+});
+
+describe("orgStatementSchema", () => {
+  it("should parse with defaults when fields are omitted", () => {
+    const result = orgStatementSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.sloganTh).toBe("");
+      expect(result.data.sloganEn).toBe("");
+      expect(result.data.visionTh).toBe("");
+      expect(result.data.visionEn).toBe("");
+    }
+  });
+
+  it("should trim string values correctly", () => {
+    const result = orgStatementSchema.safeParse({
+      sloganTh: "   สโลแกน   ",
+      sloganEn: "   Slogan   ",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.sloganTh).toBe("สโลแกน");
+      expect(result.data.sloganEn).toBe("Slogan");
     }
   });
 });

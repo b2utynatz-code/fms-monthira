@@ -68,6 +68,17 @@ export const testGeminiSchema = z.object({
   model: z.string().trim().default("gemini-2.5-flash"),
 });
 
+export const orgStatementSchema = z.object({
+  sloganTh: z.string().trim().max(500).default(""),
+  sloganEn: z.string().trim().max(500).default(""),
+  visionTh: z.string().trim().max(2000).default(""),
+  visionEn: z.string().trim().max(2000).default(""),
+  missionTh: z.string().trim().max(3000).default(""),
+  missionEn: z.string().trim().max(3000).default(""),
+  valuesTh: z.string().trim().max(2000).default(""),
+  valuesEn: z.string().trim().max(2000).default(""),
+});
+
 export const updateSettingsSchema = z.object({
   nameTh: z.string().trim().min(1).max(255),
   nameEn: z.string().trim().min(1).max(255),
@@ -84,6 +95,7 @@ export const updateSettingsSchema = z.object({
   smtp: smtpSettingsSchema.optional(),
   contact: contactSettingsSchema.optional(),
   gemini: geminiSettingsSchema.optional(),
+  statement: orgStatementSchema.optional(),
 });
 export const updateProfileSchema = z.object({ name: z.string().trim().min(1).max(255), locale: z.enum(["th", "en"]) });
 export type SmtpSettingsInput = z.infer<typeof smtpSettingsSchema>;
@@ -91,6 +103,7 @@ export type TestSmtpInput = z.infer<typeof testSmtpSchema>;
 export type ContactSettingsInput = z.infer<typeof contactSettingsSchema>;
 export type GeminiSettingsInput = z.infer<typeof geminiSettingsSchema>;
 export type TestGeminiInput = z.infer<typeof testGeminiSchema>;
+export type OrgStatementInput = z.infer<typeof orgStatementSchema>;
 export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 

@@ -2,13 +2,15 @@
 import { useState, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Upload, Loader2, Image as ImageIcon, Mail, ExternalLink, Eye, EyeOff, Send, MapPin, Phone, Clock, Sparkles, Bot, CheckCircle2 } from "lucide-react";
+import { Upload, Loader2, Image as ImageIcon, Mail, ExternalLink, Eye, EyeOff, Send, MapPin, Phone, Clock, Sparkles, Bot, CheckCircle2, Globe, Crop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LiyonCard, LiyonField, PalettePicker } from "@/shared/components/liyon";
 import { useT } from "@/shared/lib/i18n/client";
 import type { PaletteId } from "@/shared/lib/palette";
 import type { TenantSettings } from "@/features/identity";
 import { updateSettingsAction, uploadLogoAction, testSmtpAction, testGeminiAction } from "@/features/identity/actions";
+import { LogoStudioDialog } from "./logo-studio-dialog";
+import { OrgStatementDialog } from "./org-statement-dialog";
 
 export function SettingsForm({ initial }: { initial: TenantSettings }) {
   const t = useT();
@@ -46,7 +48,19 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
       apiKey: "",
       model: initial.gemini?.model || "gemini-2.5-flash",
     },
+    statement: {
+      sloganTh: initial.statement?.sloganTh || "",
+      sloganEn: initial.statement?.sloganEn || "",
+      visionTh: initial.statement?.visionTh || "",
+      visionEn: initial.statement?.visionEn || "",
+      missionTh: initial.statement?.missionTh || "",
+      missionEn: initial.statement?.missionEn || "",
+      valuesTh: initial.statement?.valuesTh || "",
+      valuesEn: initial.statement?.valuesEn || "",
+    },
   });
+  const [logoStudioOpen, setLogoStudioOpen] = useState(false);
+  const [statementDialogOpen, setStatementDialogOpen] = useState(false);
   const hasExistingPass = Boolean(initial.smtp?.hasPass);
   const [showPass, setShowPass] = useState(false);
   const [testEmail, setTestEmail] = useState("");
@@ -192,8 +206,18 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
                       <ImageIcon className="h-6 w-6 text-muted-foreground/60" />
                     )}
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLogoStudioOpen(true)}
+                        className="gap-1.5 border-primary/40 text-primary hover:bg-primary/5 font-medium shadow-xs"
+                      >
+                        <Crop className="h-4 w-4" />
+                        <span>{t("settings.changeLogoBtn")}</span>
+                      </Button>
                       <input
                         ref={fileInputRef}
                         type="file"
@@ -204,20 +228,20 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
                       />
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="gap-1.5"
+                        className="gap-1.5 text-xs text-muted-foreground"
                       >
                         {uploading ? (
                           <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             <span>{t("settings.uploading")}</span>
                           </>
                         ) : (
                           <>
-                            <Upload className="h-4 w-4" />
+                            <Upload className="h-3.5 w-3.5" />
                             <span>{t("settings.uploadLogo")}</span>
                           </>
                         )}
@@ -234,6 +258,21 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
                         </Button>
                       )}
                     </div>
+
+                    {/* ปุ่มแก้ไขข้อความองค์กรแบบมาตรฐานโลก (อยู่ด้านล่างของปุ่มอัปโหลดภาพ) */}
+                    <div>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setStatementDialogOpen(true)}
+                        className="gap-1.5 text-xs bg-muted/80 hover:bg-muted font-medium border border-border/70"
+                      >
+                        <Globe className="h-3.5 w-3.5 text-primary" />
+                        <span>{t("settings.editStatementBtn")}</span>
+                      </Button>
+                    </div>
+
                     <span className="text-xs text-muted-foreground">
                       {t("settings.logoHint")}
                     </span>
@@ -678,6 +717,125 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
           </div>
         </LiyonCard>
 
+        {/* World-Standard Organization Statements Card */}
+        <LiyonCard>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
+            <div>
+              <h2 className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-primary" />
+                <span>{t("settings.statementCardTitle")}</span>
+              </h2>
+              <p className="text-sm text-muted-foreground mt-0.5">{t("settings.statementCardDesc")}</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setStatementDialogOpen(true)}
+              className="gap-1.5 shrink-0 border-primary/30 text-primary hover:bg-primary/5"
+            >
+              <Globe className="h-4 w-4" />
+              <span>{t("settings.editStatementBtn")}</span>
+            </Button>
+          </div>
+
+          <div className="fields">
+            {/* Slogan TH & EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LiyonField label={t("settings.statementSloganTh")} htmlFor="s-statement-slogan-th" hint={t("common.optional")}>
+                <input
+                  id="s-statement-slogan-th"
+                  type="text"
+                  placeholder={t("settings.statementSloganThPh")}
+                  value={form.statement.sloganTh}
+                  onChange={(e) => setForm({ ...form, statement: { ...form.statement, sloganTh: e.target.value } })}
+                />
+              </LiyonField>
+              <LiyonField label={t("settings.statementSloganEn")} htmlFor="s-statement-slogan-en" hint={t("common.optional")}>
+                <input
+                  id="s-statement-slogan-en"
+                  type="text"
+                  placeholder={t("settings.statementSloganEnPh")}
+                  value={form.statement.sloganEn}
+                  onChange={(e) => setForm({ ...form, statement: { ...form.statement, sloganEn: e.target.value } })}
+                />
+              </LiyonField>
+            </div>
+
+            {/* Vision TH & EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LiyonField label={t("settings.statementVisionTh")} htmlFor="s-statement-vision-th" hint={t("common.optional")}>
+                <textarea
+                  id="s-statement-vision-th"
+                  rows={2}
+                  placeholder={t("settings.statementVisionThPh")}
+                  value={form.statement.visionTh}
+                  onChange={(e) => setForm({ ...form, statement: { ...form.statement, visionTh: e.target.value } })}
+                  className="w-full rounded-md border p-2 text-sm bg-background"
+                />
+              </LiyonField>
+              <LiyonField label={t("settings.statementVisionEn")} htmlFor="s-statement-vision-en" hint={t("common.optional")}>
+                <textarea
+                  id="s-statement-vision-en"
+                  rows={2}
+                  placeholder={t("settings.statementVisionEnPh")}
+                  value={form.statement.visionEn}
+                  onChange={(e) => setForm({ ...form, statement: { ...form.statement, visionEn: e.target.value } })}
+                  className="w-full rounded-md border p-2 text-sm bg-background"
+                />
+              </LiyonField>
+            </div>
+
+            {/* Mission TH & EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LiyonField label={t("settings.statementMissionTh")} htmlFor="s-statement-mission-th" hint={t("common.optional")}>
+                <textarea
+                  id="s-statement-mission-th"
+                  rows={3}
+                  placeholder={t("settings.statementMissionThPh")}
+                  value={form.statement.missionTh}
+                  onChange={(e) => setForm({ ...form, statement: { ...form.statement, missionTh: e.target.value } })}
+                  className="w-full rounded-md border p-2 text-sm bg-background"
+                />
+              </LiyonField>
+              <LiyonField label={t("settings.statementMissionEn")} htmlFor="s-statement-mission-en" hint={t("common.optional")}>
+                <textarea
+                  id="s-statement-mission-en"
+                  rows={3}
+                  placeholder={t("settings.statementMissionEnPh")}
+                  value={form.statement.missionEn}
+                  onChange={(e) => setForm({ ...form, statement: { ...form.statement, missionEn: e.target.value } })}
+                  className="w-full rounded-md border p-2 text-sm bg-background"
+                />
+              </LiyonField>
+            </div>
+
+            {/* Core Values TH & EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LiyonField label={t("settings.statementValuesTh")} htmlFor="s-statement-values-th" hint={t("common.optional")}>
+                <textarea
+                  id="s-statement-values-th"
+                  rows={2}
+                  placeholder={t("settings.statementValuesThPh")}
+                  value={form.statement.valuesTh}
+                  onChange={(e) => setForm({ ...form, statement: { ...form.statement, valuesTh: e.target.value } })}
+                  className="w-full rounded-md border p-2 text-sm bg-background"
+                />
+              </LiyonField>
+              <LiyonField label={t("settings.statementValuesEn")} htmlFor="s-statement-values-en" hint={t("common.optional")}>
+                <textarea
+                  id="s-statement-values-en"
+                  rows={2}
+                  placeholder={t("settings.statementValuesEnPh")}
+                  value={form.statement.valuesEn}
+                  onChange={(e) => setForm({ ...form, statement: { ...form.statement, valuesEn: e.target.value } })}
+                  className="w-full rounded-md border p-2 text-sm bg-background"
+                />
+              </LiyonField>
+            </div>
+          </div>
+        </LiyonCard>
+
         <LiyonCard>
           <h2>{t("settings.brandTitle")}</h2>
           <p>{t("settings.brandDesc")}</p>
@@ -687,6 +845,25 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
 
         <div className="savebar"><Button type="button" onClick={save} disabled={pending}>{t("common.save")}</Button></div>
       </div>
+
+      <LogoStudioDialog
+        open={logoStudioOpen}
+        onOpenChange={setLogoStudioOpen}
+        currentLogoUrl={form.logoUrl}
+        onSuccess={(newLogoUrl) => {
+          setForm((prev) => ({ ...prev, logoUrl: newLogoUrl }));
+        }}
+      />
+
+      <OrgStatementDialog
+        open={statementDialogOpen}
+        onOpenChange={setStatementDialogOpen}
+        initial={form.statement}
+        onSave={(updated) => {
+          setForm((prev) => ({ ...prev, statement: updated }));
+        }}
+        hasGeminiKey={hasExistingGeminiKey || Boolean(form.gemini.apiKey)}
+      />
     </>
   );
 }
