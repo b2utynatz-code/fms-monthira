@@ -119,4 +119,39 @@ test.describe("Portal & Valley Hero Tests", () => {
     await page.goto("/users");
     await expectNoRawI18nKeys(page);
   });
+
+  test("ระบบบริหารจัดการภาควิชาหรือส่วนงานเพื่อจัดเก็บหลักสูตรทำงานได้อย่างถูกต้อง", async ({ page }) => {
+    await page.goto("/curriculum");
+    await expectNoRawI18nKeys(page);
+
+    // ตรวจสอบแท็บหลักสูตร และแท็บภาควิชา/ส่วนงาน
+    const programTab = page.getByRole("button", { name: /หลักสูตรการศึกษา|Academic Programs/i });
+    const deptTab = page.getByRole("button", { name: /ภาควิชา \/ ส่วนงาน|Departments & Divisions/i });
+    await expect(programTab).toBeVisible();
+    await expect(deptTab).toBeVisible();
+
+    // สลับไปยังแท็บภาควิชา/ส่วนงาน
+    await deptTab.click();
+    await expect(page.getByText("ภาควิชาวิทยาการคอมพิวเตอร์").first()).toBeVisible();
+    await expect(page.getByText("CS", { exact: true }).first()).toBeVisible();
+
+    // ตรวจสอบการเปิด Dialog เพิ่มภาควิชา
+    const addDeptBtn = page.getByRole("button", { name: /เพิ่มภาควิชา \/ ส่วนงาน|Add Department/i });
+    await expect(addDeptBtn).toBeVisible();
+    await addDeptBtn.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByPlaceholder("เช่น CS, IS, BA")).toBeVisible();
+    await page.getByRole("button", { name: /ยกเลิก|Cancel/i }).click();
+
+    // สลับกลับมาแท็บหลักสูตร
+    await programTab.click();
+    const addProgBtn = page.getByRole("button", { name: /เพิ่มหลักสูตรใหม่|Add Program/i });
+    await expect(addProgBtn).toBeVisible();
+    await addProgBtn.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    // ตรวจสอบว่าในฟอร์มมีตัวเลือกภาควิชา
+    const deptSelect = page.locator("select").filter({ hasText: /CS|เลือกภาควิชา/i });
+    await expect(deptSelect).toBeVisible();
+    await page.getByRole("button", { name: /ยกเลิก|Cancel/i }).click();
+  });
 });

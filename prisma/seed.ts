@@ -150,6 +150,70 @@ async function main() {
     });
   }
 
+  // Seed Academic Departments (ภาควิชา/ส่วนงาน)
+  let csDept = await prisma.academicDepartment.findFirst({ where: { tenantId: core.tenantId, code: "CS" } });
+  if (!csDept) {
+    csDept = await prisma.academicDepartment.create({
+      data: {
+        tenantId: core.tenantId,
+        code: "CS",
+        nameTh: "ภาควิชาวิทยาการคอมพิวเตอร์",
+        nameEn: "Department of Computer Science",
+        descriptionTh: "มุ่งเน้นการผลิตบัณฑิตด้านศาสตร์คอมพิวเตอร์ ปัญญาประดิษฐ์ วิศวกรรมซอฟต์แวร์ และนวัตกรรมดิจิทัล",
+        descriptionEn: "Focused on computer science, artificial intelligence, software engineering, and digital innovation.",
+        headNameTh: "ผศ.ดร. กิตติพงษ์ สิทธิศาสตร์",
+        headNameEn: "Asst. Prof. Dr. Kittipong Sittisart",
+        contactEmail: "cs@fms.ac.th",
+        contactPhone: "02-123-4567 ต่อ 1020",
+        officeLocation: "อาคาร 4 ชั้น 3 ห้อง 305",
+        orderIndex: 1,
+        isActive: true,
+      },
+    });
+  }
+
+  let isDept = await prisma.academicDepartment.findFirst({ where: { tenantId: core.tenantId, code: "IS" } });
+  if (!isDept) {
+    isDept = await prisma.academicDepartment.create({
+      data: {
+        tenantId: core.tenantId,
+        code: "IS",
+        nameTh: "ภาควิชาระบบสารสนเทศและธุรกิจดิจิทัล",
+        nameEn: "Department of Information Systems & Digital Business",
+        descriptionTh: "บ่มเพาะนักเทคโนโลยีที่เข้าใจบริบทธุรกิจและการประยุกต์ใช้ระบบสารสนเทศเพื่อความได้เปรียบเชิงแข่งขัน",
+        descriptionEn: "Nurturing technologists with strong business acumen and information system applications.",
+        headNameTh: "รศ.ดร. นันทิยา มั่นคง",
+        headNameEn: "Assoc. Prof. Dr. Nanthiya Mankong",
+        contactEmail: "is@fms.ac.th",
+        contactPhone: "02-123-4567 ต่อ 1030",
+        officeLocation: "อาคาร 4 ชั้น 3 ห้อง 308",
+        orderIndex: 2,
+        isActive: true,
+      },
+    });
+  }
+
+  let baDept = await prisma.academicDepartment.findFirst({ where: { tenantId: core.tenantId, code: "BA" } });
+  if (!baDept) {
+    baDept = await prisma.academicDepartment.create({
+      data: {
+        tenantId: core.tenantId,
+        code: "BA",
+        nameTh: "ภาควิชาบริหารธุรกิจและการตลาด",
+        nameEn: "Department of Business Administration & Marketing",
+        descriptionTh: "ผู้นำด้านการจัดการธุรกิจ การตลาดดิจิทัล และผู้ประกอบการสมัยใหม่ในระดับสากล",
+        descriptionEn: "Leading modern business administration, digital marketing, and global entrepreneurship.",
+        headNameTh: "ศ.ดร. สมชาย วิจิตรศิลป์",
+        headNameEn: "Prof. Dr. Somchai Wijitsin",
+        contactEmail: "ba@fms.ac.th",
+        contactPhone: "02-123-4567 ต่อ 1040",
+        officeLocation: "อาคาร 4 ชั้น 2 ห้อง 201",
+        orderIndex: 3,
+        isActive: true,
+      },
+    });
+  }
+
   // Seed Academic Programs
   const programCount = await prisma.academicProgram.count({ where: { tenantId: core.tenantId } });
   if (programCount === 0) {
@@ -163,6 +227,7 @@ async function main() {
           degreeTh: "วท.บ. (วิทยาการคอมพิวเตอร์)",
           degreeEn: "B.Sc. (Computer Science)",
           degreeLevel: "BACHELOR",
+          departmentId: csDept.id,
           department: "ภาควิชาวิทยาการคอมพิวเตอร์",
           durationYears: 4,
           totalCredits: 128,
@@ -178,7 +243,8 @@ async function main() {
           degreeTh: "วท.บ. (เทคโนโลยีสารสนเทศ)",
           degreeEn: "B.Sc. (Information Technology)",
           degreeLevel: "BACHELOR",
-          department: "ภาควิชาระบบสารสนเทศ",
+          departmentId: isDept.id,
+          department: "ภาควิชาระบบสารสนเทศและธุรกิจดิจิทัล",
           durationYears: 4,
           totalCredits: 126,
           tuitionFeePerTerm: 24000,
@@ -193,6 +259,7 @@ async function main() {
           degreeTh: "วท.ม. (วิทยาการข้อมูลและปัญญาประดิษฐ์)",
           degreeEn: "M.Sc. (Data Science & AI)",
           degreeLevel: "MASTER",
+          departmentId: csDept.id,
           department: "ภาควิชาวิทยาการคอมพิวเตอร์",
           durationYears: 2,
           totalCredits: 36,
@@ -200,6 +267,20 @@ async function main() {
           status: "ACTIVE",
         },
       ],
+    });
+  } else {
+    // ซิงค์ departmentId ให้กับโปรแกรมเดิมหากยังไม่มี
+    await prisma.academicProgram.updateMany({
+      where: { tenantId: core.tenantId, code: "CS-2026", departmentId: null },
+      data: { departmentId: csDept.id, department: "ภาควิชาวิทยาการคอมพิวเตอร์" },
+    });
+    await prisma.academicProgram.updateMany({
+      where: { tenantId: core.tenantId, code: "IT-2026", departmentId: null },
+      data: { departmentId: isDept.id, department: "ภาควิชาระบบสารสนเทศและธุรกิจดิจิทัล" },
+    });
+    await prisma.academicProgram.updateMany({
+      where: { tenantId: core.tenantId, code: "DS-2026", departmentId: null },
+      data: { departmentId: csDept.id, department: "ภาควิชาวิทยาการคอมพิวเตอร์" },
     });
   }
 

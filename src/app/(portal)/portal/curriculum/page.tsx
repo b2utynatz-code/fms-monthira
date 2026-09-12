@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap, Clock, ArrowRight } from "lucide-react";
+import { GraduationCap, Clock, ArrowRight, Building2 } from "lucide-react";
 import { prisma } from "@/shared/lib/infra/prisma";
 import { getLocale } from "@/shared/lib/i18n/server";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ export default async function PublicCurriculumPage() {
 
   const programs = await prisma.academicProgram.findMany({
     where: { tenantId, status: { not: "CLOSED" } },
+    include: { departmentRef: true },
     orderBy: [{ degreeLevel: "asc" }, { code: "asc" }],
   });
 
@@ -94,8 +95,13 @@ export default async function PublicCurriculumPage() {
                     {degree}
                   </p>
 
-                  <div className="text-xs font-medium text-muted-foreground pt-1">
-                    {prog.department}
+                  <div className="text-xs font-medium text-muted-foreground pt-1 flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                    <span>
+                      {prog.departmentRef
+                        ? (locale === "en" ? prog.departmentRef.nameEn : prog.departmentRef.nameTh)
+                        : prog.department}
+                    </span>
                   </div>
                 </div>
 

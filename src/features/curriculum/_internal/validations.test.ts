@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { createProgramSchema, updateProgramSchema } from "./validations";
+import {
+  createProgramSchema,
+  updateProgramSchema,
+  createDepartmentSchema,
+  updateDepartmentSchema,
+} from "./validations";
+
 
 describe("curriculum validations", () => {
   const validProgram = {
@@ -122,4 +128,77 @@ describe("curriculum validations", () => {
       expect(invalidId.success).toBe(false);
     });
   });
+
+  describe("createDepartmentSchema", () => {
+    const validDept = {
+      code: "CS",
+      nameTh: "ภาควิชาวิทยาการคอมพิวเตอร์",
+      nameEn: "Department of Computer Science",
+      descriptionTh: "หลักสูตรทางด้านวิทยาศาสตร์คอมพิวเตอร์",
+      headNameTh: "ผศ.ดร. กิตติพงษ์ สิทธิศาสตร์",
+      contactEmail: "cs@fms.ac.th",
+      contactPhone: "02-123-4567",
+      officeLocation: "อาคาร 4 ชั้น 3",
+      orderIndex: 1,
+      isActive: true,
+    };
+
+    it("should accept valid department data", () => {
+      const result = createDepartmentSchema.safeParse(validDept);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.code).toBe("CS");
+        expect(result.data.nameTh).toBe("ภาควิชาวิทยาการคอมพิวเตอร์");
+      }
+    });
+
+    it("should apply default values for orderIndex and isActive", () => {
+      const minimal = {
+        code: "IT",
+        nameTh: "ภาควิชาระบบสารสนเทศ",
+        nameEn: "Department of Information Systems",
+      };
+      const result = createDepartmentSchema.safeParse(minimal);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.orderIndex).toBe(0);
+        expect(result.data.isActive).toBe(true);
+      }
+    });
+
+    it("should reject empty code or nameTh", () => {
+      const emptyCode = createDepartmentSchema.safeParse({ ...validDept, code: "" });
+      expect(emptyCode.success).toBe(false);
+
+      const emptyNameTh = createDepartmentSchema.safeParse({ ...validDept, nameTh: "" });
+      expect(emptyNameTh.success).toBe(false);
+    });
+
+    it("should validate email format if provided", () => {
+      const invalidEmail = createDepartmentSchema.safeParse({ ...validDept, contactEmail: "invalid-email" });
+      expect(invalidEmail.success).toBe(false);
+
+      const emptyEmail = createDepartmentSchema.safeParse({ ...validDept, contactEmail: "" });
+      expect(emptyEmail.success).toBe(true);
+    });
+  });
+
+  describe("updateDepartmentSchema", () => {
+    it("should accept partial updates with valid UUID", () => {
+      const result = updateDepartmentSchema.safeParse({
+        id: "a0000000-0000-4000-8000-000000000001",
+        nameTh: "ภาควิชาวิทยาการคอมพิวเตอร์และปัญญาประดิษฐ์",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject invalid UUID", () => {
+      const result = updateDepartmentSchema.safeParse({
+        id: "invalid-id",
+        nameTh: "ทดสอบ",
+      });
+      expect(result.success).toBe(false);
+    });
+  });
 });
+

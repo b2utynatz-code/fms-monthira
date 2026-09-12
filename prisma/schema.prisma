@@ -38,6 +38,7 @@ model Tenant {
   sampleItems         SampleItem[]
   newsArticles        NewsArticle[]
   facultyMembers      FacultyMember[]
+  academicDepartments AcademicDepartment[]
   academicPrograms    AcademicProgram[]
   documentRequests    DocumentRequest[]
   bookingResources    BookingResource[]
@@ -336,6 +337,32 @@ enum ProgramStatus {
   CLOSED
 }
 
+model AcademicDepartment {
+  id             String            @id @default(uuid()) @db.Uuid
+  tenantId       String            @map("tenant_id") @db.Uuid
+  code           String            @db.VarChar(50)
+  nameTh         String            @map("name_th") @db.VarChar(255)
+  nameEn         String            @map("name_en") @db.VarChar(255)
+  descriptionTh  String?           @map("description_th") @db.Text
+  descriptionEn  String?           @map("description_en") @db.Text
+  headNameTh     String?           @map("head_name_th") @db.VarChar(150)
+  headNameEn     String?           @map("head_name_en") @db.VarChar(150)
+  contactEmail   String?           @map("contact_email") @db.VarChar(255)
+  contactPhone   String?           @map("contact_phone") @db.VarChar(50)
+  officeLocation String?           @map("office_location") @db.VarChar(150)
+  orderIndex     Int               @default(0) @map("order_index")
+  isActive       Boolean           @default(true) @map("is_active")
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz()
+
+  tenant         Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  programs       AcademicProgram[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, orderIndex])
+  @@map("academic_departments")
+}
+
 model AcademicProgram {
   id                String             @id @default(uuid()) @db.Uuid
   tenantId          String             @map("tenant_id") @db.Uuid
@@ -345,6 +372,8 @@ model AcademicProgram {
   degreeTh          String             @map("degree_th") @db.VarChar(150)
   degreeEn          String             @map("degree_en") @db.VarChar(150)
   degreeLevel       DegreeLevel        @default(BACHELOR) @map("degree_level")
+  departmentId      String?            @map("department_id") @db.Uuid
+  departmentRef     AcademicDepartment? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   department        String             @db.VarChar(150)
   durationYears     Int                @default(4) @map("duration_years")
   totalCredits      Int                @map("total_credits")
@@ -363,6 +392,7 @@ model AcademicProgram {
 
   @@unique([tenantId, code])
   @@index([tenantId, degreeLevel])
+  @@index([tenantId, departmentId])
   @@map("academic_programs")
 }
 
