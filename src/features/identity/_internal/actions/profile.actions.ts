@@ -15,7 +15,7 @@ export async function setLocaleAction(locale: Locale): Promise<ActionResult<{ lo
     const value = asLocale(locale);
     (await cookies()).set(LOCALE_COOKIE, value, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
     const ctx = await getSessionContext();
-    if (ctx) await prisma.user.update({ where: { id: ctx.userId }, data: { locale: value } });
+    if (ctx) await prisma.user.updateMany({ where: { id: ctx.userId }, data: { locale: value } });
     return { locale: value };
   });
 }

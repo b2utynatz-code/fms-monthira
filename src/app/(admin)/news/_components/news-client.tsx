@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Edit2, Trash2, Newspaper, AlertCircle, Eye, Pin } from "lucide-react";
+import { Plus, Edit2, Trash2, Newspaper, AlertCircle, Eye, Pin, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   DataTable,
@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useT, useLocale } from "@/shared/lib/i18n/client";
 import { formatDate } from "@/shared/lib/format";
 import type { NewsArticleDto, CreateNewsInput } from "@/features/news";
-import { createNewsAction, updateNewsAction, deleteNewsAction } from "@/features/news/actions";
+import { createNewsAction, updateNewsAction, deleteNewsAction, translateNewsWithGeminiAction } from "@/features/news/actions";
 
 interface NewsClientProps {
   initialItems: NewsArticleDto[];
@@ -47,6 +47,36 @@ export function NewsClient({ initialItems, canManage }: NewsClientProps) {
   const [category, setCategory] = useState<"ACADEMIC" | "ACTIVITY" | "RESEARCH" | "ANNOUNCEMENT" | "PROCUREMENT">("ANNOUNCEMENT");
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED" | "ARCHIVED">("DRAFT");
   const [isPinned, setIsPinned] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const handleAiTranslate = async () => {
+    if (!titleTh.trim() || !contentTh.trim()) {
+      toast.error(t("news.aiRequireThai"));
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const res = await translateNewsWithGeminiAction({
+        titleTh,
+        summaryTh: summaryTh || undefined,
+        contentTh,
+      });
+      if (res.ok) {
+        setTitleEn(res.data.titleEn);
+        if (res.data.summaryEn) setSummaryEn(res.data.summaryEn);
+        setContentEn(res.data.contentEn);
+        toast.success(t("news.aiSuccess"));
+      } else {
+        toast.error(res.error.message || t("common.error"));
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(msg || t("common.error"));
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   const openCreateDialog = () => {
     setEditingItem(null);
@@ -257,7 +287,44 @@ export function NewsClient({ initialItems, canManage }: NewsClientProps) {
           title={editingItem ? t("news.edit") : t("news.create")}
           description={t("news.description")}
         />
-        <LiyonDialogBody>
+        <LiyonDialogBody className="max-h-[70vh] overflow-y-auto pr-2">
+          {/* AI Translation Tool Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-primary/5 border border-primary/20 rounded-lg p-3 my-1">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground">
+                  ระบบช่วยสร้างและแปลข่าวเป็นภาษาอังกฤษด้วย Google Gemini (AI)
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  กรอกหัวข้อและเนื้อหาภาษาไทย จากนั้นกดปุ่มเพื่อสร้างหัวข้อ สรุปย่อ และเนื้อหาภาษาอังกฤษอัตโนมัติ
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAiTranslate}
+              disabled={isTranslating || isPending || !titleTh.trim() || !contentTh.trim()}
+              className="gap-1.5 h-8 shrink-0 text-primary border-primary/30 hover:bg-primary/10 font-medium"
+            >
+              {isTranslating ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>{t("news.aiTranslating")}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>{t("news.aiTranslate")}</span>
+                </>
+              )}
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
             <LiyonField label={t("news.titleTh")}>
               <input

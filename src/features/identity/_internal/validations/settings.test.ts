@@ -147,5 +147,40 @@ describe("updateSettingsSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("should accept valid gemini AI settings", () => {
+    const result = updateSettingsSchema.safeParse({
+      nameTh: "คณะการจัดการ",
+      nameEn: "Faculty of Management Sciences",
+      palette: "blue",
+      gemini: {
+        enabled: true,
+        apiKey: "AIzaSyFakeKeyForTesting123",
+        model: "gemini-2.5-flash",
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.gemini?.enabled).toBe(true);
+      expect(result.data.gemini?.apiKey).toBe("AIzaSyFakeKeyForTesting123");
+      expect(result.data.gemini?.model).toBe("gemini-2.5-flash");
+    }
+  });
+
+  it("should default gemini model to gemini-2.5-flash if omitted", () => {
+    const result = updateSettingsSchema.safeParse({
+      nameTh: "คณะการจัดการ",
+      nameEn: "Faculty of Management Sciences",
+      palette: "blue",
+      gemini: {
+        enabled: true,
+        apiKey: "AIzaSyFakeKey",
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.gemini?.model).toBe("gemini-2.5-flash");
+    }
+  });
 });
 

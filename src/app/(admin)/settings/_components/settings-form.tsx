@@ -2,13 +2,13 @@
 import { useState, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Upload, Loader2, Image as ImageIcon, Mail, ExternalLink, Eye, EyeOff, Send, MapPin, Phone, Clock } from "lucide-react";
+import { Upload, Loader2, Image as ImageIcon, Mail, ExternalLink, Eye, EyeOff, Send, MapPin, Phone, Clock, Sparkles, Bot, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LiyonCard, LiyonField, PalettePicker } from "@/shared/components/liyon";
 import { useT } from "@/shared/lib/i18n/client";
 import type { PaletteId } from "@/shared/lib/palette";
 import type { TenantSettings } from "@/features/identity";
-import { updateSettingsAction, uploadLogoAction, testSmtpAction } from "@/features/identity/actions";
+import { updateSettingsAction, uploadLogoAction, testSmtpAction, testGeminiAction } from "@/features/identity/actions";
 
 export function SettingsForm({ initial }: { initial: TenantSettings }) {
   const t = useT();
@@ -41,11 +41,21 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
       line: initial.contact?.line ?? "",
       website: initial.contact?.website ?? "",
     },
+    gemini: {
+      enabled: initial.gemini?.enabled ?? true,
+      apiKey: "",
+      model: initial.gemini?.model || "gemini-2.5-flash",
+    },
   });
   const hasExistingPass = Boolean(initial.smtp?.hasPass);
   const [showPass, setShowPass] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [testing, setTesting] = useState(false);
+
+  const hasExistingGeminiKey = Boolean(initial.gemini?.hasApiKey);
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
+  const [testingGemini, setTestingGemini] = useState(false);
+
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [pending, start] = useTransition();
   const [uploading, setUploading] = useState(false);
@@ -120,6 +130,31 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
       toast.error(t("settings.smtpTestFailed", { error: msg }));
     } finally {
       setTesting(false);
+    }
+  }
+
+  async function handleTestGemini() {
+    if (!form.gemini.apiKey && !hasExistingGeminiKey) {
+      toast.error(t("settings.geminiMissingKey"));
+      return;
+    }
+
+    setTestingGemini(true);
+    try {
+      const res = await testGeminiAction({
+        apiKey: form.gemini.apiKey,
+        model: form.gemini.model,
+      });
+      if (res.ok) {
+        toast.success(t("settings.geminiTestSuccess"));
+      } else {
+        toast.error(res.error.message || t("common.error"));
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(msg || t("common.error"));
+    } finally {
+      setTestingGemini(false);
     }
   }
 
@@ -377,6 +412,131 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
                     </>
                   )}
                 </Button>
+              </div>
+            </div>
+          </div>
+        </LiyonCard>
+
+        {/* Google Gemini AI Configuration Card */}
+        <LiyonCard>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
+            <div>
+              <h2 className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <span>{t("settings.geminiTitle")}</span>
+              </h2>
+              <p className="text-sm text-muted-foreground mt-0.5">{t("settings.geminiDesc")}</p>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer select-none bg-muted/50 px-3 py-1.5 rounded-lg border border-border/60 hover:bg-muted transition-colors">
+              <input
+                id="s-gemini-enabled"
+                type="checkbox"
+                checked={form.gemini.enabled}
+                onChange={(e) => setForm({ ...form, gemini: { ...form.gemini, enabled: e.target.checked } })}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+              />
+              <span className="text-xs font-semibold">{t("settings.geminiEnabled")}</span>
+            </label>
+          </div>
+
+          <div className="fields">
+            {/* Guide notice */}
+            <div className="rounded-lg border border-indigo-200 bg-indigo-50 dark:border-indigo-900/50 dark:bg-indigo-950/30 p-3 text-xs text-indigo-900 dark:text-indigo-200 space-y-1.5">
+              <div className="font-semibold flex items-center gap-1.5">
+                <Bot className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                <span>คำแนะนำการเชื่อมต่อ Google Gemini API</span>
+              </div>
+              <p className="leading-relaxed text-indigo-800 dark:text-indigo-300">
+                {t("settings.geminiApiKeyHint")}
+              </p>
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+              >
+                <span>{t("settings.geminiApiKeyLink")}</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+
+            {/* API Key Input */}
+            <LiyonField
+              label={t("settings.geminiApiKey")}
+              htmlFor="s-gemini-api-key"
+              hint={hasExistingGeminiKey ? t("settings.geminiApiKeyHasExisting") : undefined}
+            >
+              <div className="relative flex items-center">
+                <input
+                  id="s-gemini-api-key"
+                  type={showGeminiKey ? "text" : "password"}
+                  placeholder={hasExistingGeminiKey ? "••••••••••••••••••••••••••••••••" : t("settings.geminiApiKeyPh")}
+                  value={form.gemini.apiKey}
+                  onChange={(e) => setForm({ ...form, gemini: { ...form.gemini, apiKey: e.target.value } })}
+                  className="pr-10 w-full font-mono text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowGeminiKey(!showGeminiKey)}
+                  className="absolute right-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                  aria-label={showGeminiKey ? "Hide API key" : "Show API key"}
+                >
+                  {showGeminiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </LiyonField>
+
+            {/* Model Selection */}
+            <LiyonField label={t("settings.geminiModel")} htmlFor="s-gemini-model">
+              <select
+                id="s-gemini-model"
+                value={form.gemini.model}
+                onChange={(e) => setForm({ ...form, gemini: { ...form.gemini, model: e.target.value } })}
+                className="w-full rounded-md border px-3 py-2 text-sm bg-background"
+              >
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash (เร็วและแม่นยำสูง - แนะนำ)</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (มาตรฐาน)</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro (งานซับซ้อนและวิเคราะห์เชิงลึก)</option>
+              </select>
+            </LiyonField>
+
+            {/* Test Gemini Connection */}
+            <div className="pt-2 border-t space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span>{t("settings.geminiTestTitle")}</span>
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("settings.geminiTestDesc")}</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTestGemini}
+                  disabled={testingGemini || (!form.gemini.apiKey && !hasExistingGeminiKey)}
+                  className="gap-1.5"
+                >
+                  {testingGemini ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>{t("settings.geminiTesting")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <span>{t("settings.geminiTestBtn")}</span>
+                    </>
+                  )}
+                </Button>
+                {hasExistingGeminiKey && !form.gemini.apiKey && (
+                  <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>API Key บันทึกในระบบแล้ว</span>
+                  </span>
+                )}
               </div>
             </div>
           </div>

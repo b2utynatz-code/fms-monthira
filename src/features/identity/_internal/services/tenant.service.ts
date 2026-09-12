@@ -30,6 +30,19 @@ export interface ContactSettings {
   website?: string;
 }
 
+export interface GeminiClientSettings {
+  enabled: boolean;
+  apiKey: string;
+  hasApiKey: boolean;
+  model: string;
+}
+
+export interface GeminiRawSettings {
+  enabled: boolean;
+  apiKey: string;
+  model: string;
+}
+
 export interface TenantSettings {
   code: string;
   nameTh: string;
@@ -38,12 +51,13 @@ export interface TenantSettings {
   palette: PaletteId;
   smtp?: SmtpSettings;
   contact?: ContactSettings;
+  gemini?: GeminiClientSettings;
 }
 
 async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSettings> {
   const t = await db.tenant.findUnique({ where: { id: tenantId } });
   if (!t) throw errors.not_found();
-  const raw = (t.settings as { palette?: unknown; smtp?: Partial<SmtpSettings>; contact?: Partial<ContactSettings> } | null) || {};
+  const raw = (t.settings as { palette?: unknown; smtp?: Partial<SmtpSettings>; contact?: Partial<ContactSettings>; gemini?: Partial<GeminiRawSettings> } | null) || {};
   const p = raw.palette;
   const rawSmtp = raw.smtp;
   const hasPass = Boolean(rawSmtp?.pass && rawSmtp.pass.length > 0);
@@ -73,6 +87,16 @@ async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSetti
     website: rawContact?.website ?? "",
   };
 
+  const rawGemini = raw.gemini;
+  const envKey = process.env.GEMINI_API_KEY || "";
+  const hasGeminiKey = Boolean((rawGemini?.apiKey && rawGemini.apiKey.length > 0) || (envKey && envKey.length > 0));
+  const gemini: GeminiClientSettings = {
+    enabled: rawGemini?.enabled ?? true,
+    apiKey: "", // ไม่เปิดเผย API Key จริงไปยัง client
+    hasApiKey: hasGeminiKey,
+    model: rawGemini?.model || "gemini-2.5-flash",
+  };
+
   return {
     code: t.code,
     nameTh: t.nameTh,
@@ -81,6 +105,7 @@ async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSetti
     palette: isPalette(p) ? p : DEFAULT_PALETTE,
     smtp,
     contact,
+    gemini,
   };
 }
 
@@ -107,12 +132,26 @@ export async function getTenantRawSmtp(tenantId: string): Promise<SmtpSettings |
   };
 }
 
-/** เก็บคีย์อื่น ๆ ใน settings JSON ไว้ทั้งหมด — merge เฉพาะ palette และ smtp ที่เปลี่ยน ไม่ทับทั้งก้อน */
+/** ดึงข้อมูล Gemini API Key พร้อมใช้จริงสำหรับเซิร์ฟเวอร์เท่านั้น (fallback ไปยัง process.env.GEMINI_API_KEY) */
+export async function getTenantRawGemini(tenantId: string): Promise<GeminiRawSettings | null> {
+  const t = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { settings: true } });
+  const raw = (t?.settings as { gemini?: Partial<GeminiRawSettings> } | null)?.gemini;
+  const envKey = process.env.GEMINI_API_KEY || "";
+  const apiKey = (raw?.apiKey && raw.apiKey.length > 0) ? raw.apiKey : envKey;
+  if (!apiKey) return null;
+  return {
+    enabled: raw?.enabled ?? true,
+    apiKey,
+    model: raw?.model || "gemini-2.5-flash",
+  };
+}
+
+/** เก็บคีย์อื่น ๆ ใน settings JSON ไว้ทั้งหมด — merge เฉพาะ palette, smtp, contact, gemini ที่เปลี่ยน ไม่ทับทั้งก้อน */
 export async function updateTenantSettings(input: { tenantId: string; actorId: string } & UpdateSettingsInput): Promise<void> {
   await prisma.$transaction(async (tx) => {
     const before = await readTenantSettings(input.tenantId, tx);
     const t = await tx.tenant.findUniqueOrThrow({ where: { id: input.tenantId }, select: { settings: true } });
-    const existingSettings = (t.settings as { palette?: unknown; smtp?: Partial<SmtpSettings> } | null) || {};
+    const existingSettings = (t.settings as { palette?: unknown; smtp?: Partial<SmtpSettings>; gemini?: Partial<GeminiRawSettings> } | null) || {};
 
     let newSmtp = existingSettings.smtp;
     if (input.smtp) {
@@ -132,11 +171,23 @@ export async function updateTenantSettings(input: { tenantId: string; actorId: s
       };
     }
 
+    let newGemini = existingSettings.gemini;
+    if (input.gemini) {
+      const rawKey = input.gemini.apiKey?.trim();
+      const apiKey = rawKey ? rawKey : (existingSettings.gemini?.apiKey || "");
+      newGemini = {
+        enabled: input.gemini.enabled,
+        apiKey,
+        model: input.gemini.model || "gemini-2.5-flash",
+      };
+    }
+
     const newSettings = {
       ...existingSettings,
       palette: input.palette,
       ...(newSmtp ? { smtp: newSmtp } : {}),
       ...(input.contact ? { contact: input.contact } : {}),
+      ...(newGemini ? { gemini: newGemini } : {}),
     };
 
     await tx.tenant.update({

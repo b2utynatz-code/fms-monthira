@@ -5,8 +5,8 @@ import { getLocale } from "@/shared/lib/i18n/server";
 import { zodErrorMap } from "@/shared/lib/i18n/zod-locale";
 import { P } from "../../permissions";
 import { requirePermission } from "../rbac";
-import { updateSettingsSchema, testSmtpSchema } from "../validations/settings";
-import { getTenantSettings, updateTenantSettings, getTenantRawSmtp, type TenantSettings } from "../services/tenant.service";
+import { updateSettingsSchema, testSmtpSchema, testGeminiSchema } from "../validations/settings";
+import { getTenantSettings, updateTenantSettings, getTenantRawSmtp, getTenantRawGemini, type TenantSettings } from "../services/tenant.service";
 
 import path from "node:path";
 import fs from "node:fs/promises";
@@ -124,6 +124,45 @@ export async function testSmtpAction(input: unknown): Promise<ActionResult<{ suc
     }
 
     return { success: true };
+  });
+}
+
+export async function testGeminiAction(input: unknown): Promise<ActionResult<{ success: boolean; message: string }>> {
+  return runAction(async () => {
+    const ctx = await requirePermission(P.settingsManage);
+    const parsed = testGeminiSchema.parse(input, { error: zodErrorMap(await getLocale()) });
+
+    let apiKey = parsed.apiKey.trim();
+    if (!apiKey) {
+      const saved = await getTenantRawGemini(ctx.tenantId);
+      apiKey = saved?.apiKey || "";
+    }
+    if (!apiKey) {
+      throw new AppError("validation", "กรุณากรอก Gemini API Key ก่อนทดสอบ");
+    }
+
+    const model = parsed.model || "gemini-2.5-flash";
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: "Hello, reply with 'OK' only." }],
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errMessage = (errData as { error?: { message?: string } })?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
+      throw new AppError("validation", `เชื่อมต่อ Gemini API ล้มเหลว: ${errMessage}`);
+    }
+
+    return { success: true, message: "เชื่อมต่อ Google Gemini API สำเร็จ" };
   });
 }
 
