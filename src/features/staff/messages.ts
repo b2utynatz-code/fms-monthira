@@ -1,5 +1,6 @@
 export const MESSAGES = {
   "staff.nav": { th: "บุคลากร", en: "Faculty & Staff" },
+  "staff.tab.directory": { th: "ทำเนียบคณาจารย์", en: "Faculty Directory" },
   "staff.title": { th: "จัดการบุคลากรและคณาจารย์", en: "Faculty & Staff Directory" },
   "staff.description": { th: "ข้อมูลอาจารย์ เจ้าหน้าที่ และโครงสร้างองค์กร", en: "Manage professors, officers, and organizational structure" },
   "staff.create": { th: "เพิ่มบุคลากรใหม่", en: "Add Staff Member" },

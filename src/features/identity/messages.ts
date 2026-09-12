@@ -184,6 +184,7 @@ export const MESSAGES: Dictionary = {
   "settings.smtpTestFailed": { th: "การส่งอีเมลทดสอบล้มเหลว: {error}", en: "Failed to send test email: {error}" },
   "settings.smtpMissingPassword": { th: "กรุณากรอกรหัสผ่านแอป (App Password) ก่อนทดสอบ", en: "Please enter Google App Password before testing" },
   // contact
+  "settings.nav.contact": { th: "ช่องทางการติดต่อ", en: "Contact Details" },
   "settings.contactTitle": { th: "ข้อมูลการติดต่อและที่อยู่", en: "Contact & Location" },
   "settings.contactDesc": { th: "กำหนดข้อมูลการติดต่อ ที่อยู่ และเวลาทำการสำหรับแสดงบนหน้า Portal สาธารณะ", en: "Configure contact details, address, and office hours displayed on the public portal" },
   "settings.contactPhone": { th: "เบอร์โทรศัพท์ติดต่อ", en: "Contact Phone" },

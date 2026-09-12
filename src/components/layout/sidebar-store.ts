@@ -31,7 +31,17 @@ export const useSidebarStore = create<SidebarState>()(
     (set) => ({
       collapsed: false,
       openGroup: null,
-      openGroups: ["/curriculum", "/users"],
+      openGroups: [
+        "/dashboard",
+        "/news",
+        "/staff",
+        "/curriculum",
+        "/documents",
+        "/bookings",
+        "/sample",
+        "/users",
+        "/settings",
+      ],
 
       toggleCollapsed: () =>
         set((s) => ({ collapsed: !s.collapsed })),

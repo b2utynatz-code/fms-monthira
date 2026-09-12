@@ -43,6 +43,8 @@ export const MESSAGES: Dictionary = {
   "nav.group.users": { th: "ผู้ใช้งาน", en: "Users" },
   "nav.group.settings": { th: "ตั้งค่า", en: "Settings" },
   "nav.dashboard": { th: "แดชบอร์ด", en: "Dashboard" },
+  "dashboard.nav.overview": { th: "ภาพรวมระบบ", en: "System Overview" },
+  "dashboard.nav.portal": { th: "หน้าเว็บสาธารณะ (Portal)", en: "Public Portal" },
   "nav.users": { th: "ผู้ใช้", en: "Users" },
   "nav.roles": { th: "บทบาท", en: "Roles" },
   "nav.settings": { th: "ตั้งค่าองค์กร", en: "Organization" },

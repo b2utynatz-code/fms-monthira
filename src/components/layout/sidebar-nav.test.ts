@@ -26,4 +26,12 @@ describe("sidebar-nav", () => {
     expect(getActiveNavChain("/nowhere")).toEqual([]);
   });
   it("โครงเมนูมีกลุ่มเมนูหลัก", () => expect(sidebarGroups.length).toBeGreaterThanOrEqual(3));
+  it("ทุกเมนูหลักมีเมนูย่อย (children) อย่างน้อย 2 รายการ", () => {
+    const allItems = sidebarGroups.flatMap((g) => g.items);
+    expect(allItems.length).toBeGreaterThanOrEqual(9);
+    for (const item of allItems) {
+      expect(item.children, `เมนู ${item.title} (${item.href}) ไม่มี children`).toBeDefined();
+      expect(item.children!.length, `เมนู ${item.title} (${item.href}) มีเมนูย่อยน้อยกว่า 2`).toBeGreaterThanOrEqual(2);
+    }
+  });
 });

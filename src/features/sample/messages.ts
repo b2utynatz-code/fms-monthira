@@ -2,6 +2,7 @@ import type { Dictionary } from "@/shared/lib/i18n/translate";
 
 export const MESSAGES: Dictionary = {
   "sample.nav": { th: "โมดูลตัวอย่าง", en: "Sample Module" },
+  "sample.tab.items": { th: "รายการข้อมูลตัวอย่าง", en: "Sample Items" },
   "sample.title": { th: "รายการข้อมูลตัวอย่าง", en: "Sample Items" },
   "sample.subtitle": { th: "ตัวอย่างหน้า CRUD สำหรับให้นักเรียนดูเป็นแม่แบบในการพัฒนาฟีเจอร์ใหม่", en: "A sample CRUD feature for students to reference when building new features" },
   "sample.create": { th: "เพิ่มข้อมูล", en: "Add Item" },

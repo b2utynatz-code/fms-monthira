@@ -20,12 +20,43 @@ export interface NavGroup { label: string; items: NavItem[] }
 export interface NavCrumb { title: string; href: string }
 
 export const sidebarGroups: NavGroup[] = [
-  { label: "nav.group.overview", items: [{ title: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard }] },
+  {
+    label: "nav.group.overview",
+    items: [
+      {
+        title: "nav.dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboard,
+        children: [
+          { title: "dashboard.nav.overview", href: "/dashboard" },
+          { title: "dashboard.nav.portal", href: "/portal" },
+        ],
+      },
+    ],
+  },
   {
     label: "nav.group.faculty",
     items: [
-      { title: "news.nav", href: "/news", icon: Newspaper, permission: NEWS_P.newsRead },
-      { title: "staff.nav", href: "/staff", icon: GraduationCap, permission: STAFF_P.staffRead },
+      {
+        title: "news.nav",
+        href: "/news",
+        icon: Newspaper,
+        permission: NEWS_P.newsRead,
+        children: [
+          { title: "news.tab.all", href: "/news", permission: NEWS_P.newsRead },
+          { title: "news.create", href: "/news?action=create", permission: NEWS_P.newsManage },
+        ],
+      },
+      {
+        title: "staff.nav",
+        href: "/staff",
+        icon: GraduationCap,
+        permission: STAFF_P.staffRead,
+        children: [
+          { title: "staff.tab.directory", href: "/staff", permission: STAFF_P.staffRead },
+          { title: "staff.create", href: "/staff?action=create", permission: STAFF_P.staffManage },
+        ],
+      },
       {
         title: "curriculum.nav",
         href: "/curriculum",
@@ -36,25 +67,73 @@ export const sidebarGroups: NavGroup[] = [
           { title: "curriculum.tab.departments", href: "/curriculum/departments", permission: CURRICULUM_P.curriculumRead },
         ],
       },
-      { title: "documents.nav", href: "/documents", icon: FileText, permission: DOCUMENTS_P.documentSubmit },
-      { title: "bookings.nav", href: "/bookings", icon: CalendarDays, permission: BOOKING_P.bookingView },
+      {
+        title: "documents.nav",
+        href: "/documents",
+        icon: FileText,
+        permission: DOCUMENTS_P.documentRead,
+        children: [
+          { title: "documents.tab.all", href: "/documents", permission: DOCUMENTS_P.documentRead },
+          { title: "documents.create", href: "/documents?action=create", permission: DOCUMENTS_P.documentSubmit },
+        ],
+      },
+      {
+        title: "bookings.nav",
+        href: "/bookings",
+        icon: CalendarDays,
+        permission: BOOKING_P.bookingView,
+        children: [
+          { title: "bookings.tab.reservations", href: "/bookings", permission: BOOKING_P.bookingView },
+          { title: "bookings.tab.resources", href: "/bookings?tab=resources", permission: BOOKING_P.bookingView },
+        ],
+      },
     ],
   },
   {
     label: "nav.group.sample",
-    items: [{ title: "sample.nav", href: "/sample", icon: Layers, permission: SAMPLE_P.sampleRead }],
+    items: [
+      {
+        title: "sample.nav",
+        href: "/sample",
+        icon: Layers,
+        permission: SAMPLE_P.sampleRead,
+        children: [
+          { title: "sample.tab.items", href: "/sample", permission: SAMPLE_P.sampleRead },
+          { title: "sample.create", href: "/sample?action=create", permission: SAMPLE_P.sampleManage },
+        ],
+      },
+    ],
   },
   {
     label: "nav.group.users",
-    items: [{
-      title: "nav.users", href: "/users", icon: Users, permission: P.usersRead,
-      children: [
-        { title: "nav.users", href: "/users", permission: P.usersRead },
-        { title: "nav.roles", href: "/users/roles", permission: P.rolesManage },
-      ],
-    }],
+    items: [
+      {
+        title: "nav.users",
+        href: "/users",
+        icon: Users,
+        permission: P.usersRead,
+        children: [
+          { title: "nav.users", href: "/users", permission: P.usersRead },
+          { title: "nav.roles", href: "/users/roles", permission: P.rolesManage },
+        ],
+      },
+    ],
   },
-  { label: "nav.group.settings", items: [{ title: "nav.settings", href: "/settings", icon: Settings, permission: P.settingsManage }] },
+  {
+    label: "nav.group.settings",
+    items: [
+      {
+        title: "nav.settings",
+        href: "/settings",
+        icon: Settings,
+        permission: P.settingsManage,
+        children: [
+          { title: "nav.settings", href: "/settings", permission: P.settingsManage },
+          { title: "settings.nav.contact", href: "/settings#contact", permission: P.settingsManage },
+        ],
+      },
+    ],
+  },
 ];
 
 type Ctx = Parameters<typeof hasPermission>[0];
@@ -76,15 +155,30 @@ export function visibleGroups(ctx: Ctx): NavGroup[] {
 export function getActiveNavChain(pathname: string): NavCrumb[] {
   let best: { parent: NavItem | null; item: NavItem } | null = null;
   const consider = (item: NavItem, parent: NavItem | null) => {
-    if (pathname === item.href || pathname.startsWith(item.href + "/")) {
-      if (!best || item.href.length > best.item.href.length || (item.href.length === best.item.href.length && parent)) best = { parent, item };
+    const [clean] = item.href.split(/[?#]/);
+    if (pathname === clean || (clean !== "/" && pathname.startsWith(clean + "/"))) {
+      const bestClean = best ? best.item.href.split(/[?#]/)[0] : "";
+      if (
+        !best ||
+        clean.length > bestClean.length ||
+        (clean.length === bestClean.length && parent && !item.href.includes("?") && !item.href.includes("#"))
+      ) {
+        best = { parent, item };
+      }
     }
   };
-  for (const g of sidebarGroups) for (const i of g.items) { consider(i, null); for (const c of i.children ?? []) consider(c, i); }
+  for (const g of sidebarGroups) {
+    for (const i of g.items) {
+      consider(i, null);
+      for (const c of i.children ?? []) consider(c, i);
+    }
+  }
   if (!best) return [];
   const { parent, item } = best as { parent: NavItem | null; item: NavItem };
   const chain: NavCrumb[] = [];
-  if (parent && parent.href !== item.href) chain.push({ title: parent.title, href: parent.href });
+  const [parentClean] = parent ? parent.href.split(/[?#]/) : [""];
+  const [itemClean] = item.href.split(/[?#]/);
+  if (parent && parentClean !== itemClean) chain.push({ title: parent.title, href: parent.href });
   chain.push({ title: item.title, href: item.href });
   return chain;
 }

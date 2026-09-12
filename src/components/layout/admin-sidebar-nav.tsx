@@ -34,7 +34,18 @@ export function AdminSidebarNav() {
   const { collapsed, setCollapsed, openGroups, toggleGroup, setGroupOpen } = useSidebarStore();
   const { roles, permissions, isSuperAdmin } = useAppSession();
   const groups = visibleGroups({ roles, permissions, isSuperAdmin });
-  const activeOpenGroups = openGroups ?? ["/curriculum", "/users"];
+  const defaultOpen = [
+    "/dashboard",
+    "/news",
+    "/staff",
+    "/curriculum",
+    "/documents",
+    "/bookings",
+    "/sample",
+    "/users",
+    "/settings",
+  ];
+  const activeOpenGroups = openGroups ?? defaultOpen;
 
   // Auto-open the group containing the active route
   useEffect(() => {
@@ -42,7 +53,10 @@ export function AdminSidebarNav() {
       for (const item of group.items) {
         if (
           item.children?.some(
-            (child) => pathname === child.href || pathname.startsWith(child.href + "/"),
+            (child) => {
+              const [clean] = child.href.split(/[?#]/);
+              return pathname === clean || (clean !== "/" && pathname.startsWith(clean + "/"));
+            },
           )
         ) {
           setGroupOpen(item.href, true);
@@ -97,7 +111,11 @@ function NavLeaf({
   nested?: boolean;
 }) {
   const Icon = item.icon;
-  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+  const [cleanHref] = item.href.split(/[?#]/);
+  const isExact = pathname === item.href;
+  const isCleanExact = pathname === cleanHref && !item.href.includes("?") && !item.href.includes("#");
+  const isPrefix = cleanHref !== "/" && pathname.startsWith(cleanHref + "/");
+  const isActive = isExact || isCleanExact || isPrefix;
 
   return (
     <Link
@@ -128,7 +146,10 @@ function NavGroup({
   const Icon = item.icon;
   const children = item.children ?? [];
   const isActive = children.some(
-    (child) => pathname === child.href || pathname.startsWith(child.href + "/"),
+    (child) => {
+      const [clean] = child.href.split(/[?#]/);
+      return pathname === clean || (clean !== "/" && pathname.startsWith(clean + "/"));
+    },
   );
 
   return (
@@ -143,7 +164,7 @@ function NavGroup({
       <div className="sub">
         <div className="hd">{t(item.title)}</div>
         {children.map((child) => (
-          <NavLeaf key={child.href} item={child} pathname={pathname} t={t} nested />
+          <NavLeaf key={`${child.href}-${child.title}`} item={child} pathname={pathname} t={t} nested />
         ))}
       </div>
     </div>

@@ -1,5 +1,6 @@
 export const MESSAGES = {
   "news.nav": { th: "ข่าวประชาสัมพันธ์", en: "News & PR" },
+  "news.tab.all": { th: "ข่าวสารและประกาศ", en: "All News & Announcements" },
   "news.title": { th: "ข่าวสารและประชาสัมพันธ์", en: "News & Announcements" },
   "news.description": { th: "จัดการข่าวสาร กิจกรรม และประกาศต่าง ๆ ของคณะ", en: "Manage faculty news, events, and announcements" },
   "news.create": { th: "สร้างข่าวใหม่", en: "Create News" },
