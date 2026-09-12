@@ -310,7 +310,7 @@ export default async function DashboardPage() {
                   <div key={log.id} className="text-xs space-y-1 pb-3 border-b last:border-0 last:pb-0">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono font-medium text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                        {log.action}
+                        {log.action.replace(/\./g, " : ")}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
                         {new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

@@ -12,6 +12,7 @@ const PROGRAM_IMAGES: Record<string, string> = {
   "CS-2026": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80",
   "IT-2026": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop&q=80",
   "DS-2026": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80",
+  "MBD-2566": "https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80",
 };
 
 export default async function PortalHomePage() {

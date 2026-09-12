@@ -216,6 +216,27 @@ async function main() {
     });
   }
 
+  let dtcDept = await prisma.academicDepartment.findFirst({ where: { tenantId: core.tenantId, code: "DTC" } });
+  if (!dtcDept) {
+    dtcDept = await prisma.academicDepartment.create({
+      data: {
+        tenantId: core.tenantId,
+        code: "DTC",
+        nameTh: "วิทยาลัยพระธรรมทูต",
+        nameEn: "Dhammaduta College",
+        descriptionTh: "ศูนย์กลางการศึกษาและฝึกอบรมพระธรรมทูตสายต่างประเทศ พัฒนาผู้นำทางจิตวิญญาณและปัญญาเพื่อสันติภาพโลก",
+        descriptionEn: "Center for overseas Buddhist missionary education and leadership for world peace.",
+        headNameTh: "พระมหาประยูร โชติวโร, ดร.",
+        headNameEn: "Dr. Phramaha Prayoon Chotivaro",
+        contactEmail: "dhammaduta@mcu.ac.th",
+        contactPhone: "035-248-000 ต่อ 8100",
+        officeLocation: "อาคารเรียนรวม มจร ต.ลำไทร อ.วังน้อย จ.พระนครศรีอยุธยา",
+        orderIndex: 4,
+        isActive: true,
+      },
+    });
+  }
+
   // Seed Academic Programs
   const programCount = await prisma.academicProgram.count({ where: { tenantId: core.tenantId } });
   if (programCount === 0) {
@@ -268,6 +289,40 @@ async function main() {
           tuitionFeePerTerm: 45000,
           status: "ACTIVE",
         },
+        {
+          tenantId: core.tenantId,
+          code: "MBD-2566",
+          nameTh: "หลักสูตรพุทธศาสตรมหาบัณฑิต สาขาวิชาพระธรรมทูต",
+          nameEn: "Master of Buddhism Program in Dhammaduta",
+          degreeTh: "พุทธศาสตรมหาบัณฑิต (พระธรรมทูต)",
+          degreeEn: "Master of Buddhism (Dhammaduta)",
+          degreeLevel: "MASTER",
+          departmentId: dtcDept.id,
+          department: "วิทยาลัยพระธรรมทูต",
+          durationYears: 2,
+          totalCredits: 39,
+          tuitionFeePerTerm: 35000,
+          status: "OPEN_ADMISSION",
+          admissionLink: "https://reg.mcu.ac.th",
+          curriculumPdfUrl: "https://www.mcu.ac.th/curriculum/tqf2-mbd-2566.pdf",
+          descriptionTh: "มุ่งสร้างบัณฑิตให้มีความรู้ความเข้าใจหลักพุทธธรรมและศาสตร์สมัยใหม่ โดยใช้กระบวนการสร้างและประยุกต์ความรู้ใหม่เพื่อพัฒนาสังคมสันติสุขและนำพุทธปัญญาสู่สากล",
+          descriptionEn: "To produce Buddhist graduates with in-depth understanding of Buddhadhamma and modern sciences, utilizing knowledge creation and innovation for social peace.",
+          careerPaths: [
+            "พระธรรมทูต หรือธรรมทูต",
+            "นักเผยแผ่พระพุทธศาสนา",
+            "นักวิชาการด้านพระพุทธศาสนาและการต่างประเทศ",
+            "เจ้าหน้าที่องค์กรระหว่างประเทศ",
+            "เจ้าหน้าที่สื่อสารมวลชน",
+            "เจ้าหน้าที่บริหารด้านต่างประเทศ",
+            "ที่ปรึกษาองค์กรภาครัฐและเอกชนระหว่างประเทศ",
+            "มัคคุเทศก์",
+            "พนักงานโรงแรมและพนักงานการบิน",
+            "วิทยากร นักบรรยาย และนักเขียน",
+            "อนุศาสนาจารย์",
+            "นักพัฒนาสังคม",
+            "นักพัฒนาด้านกิจการคณะสงฆ์",
+          ],
+        },
       ],
     });
   } else {
@@ -284,6 +339,46 @@ async function main() {
       where: { tenantId: core.tenantId, code: "DS-2026", departmentId: null },
       data: { departmentId: csDept.id, department: "ภาควิชาวิทยาการคอมพิวเตอร์" },
     });
+
+    const existingMbd = await prisma.academicProgram.findFirst({ where: { tenantId: core.tenantId, code: "MBD-2566" } });
+    if (!existingMbd) {
+      await prisma.academicProgram.create({
+        data: {
+          tenantId: core.tenantId,
+          code: "MBD-2566",
+          nameTh: "หลักสูตรพุทธศาสตรมหาบัณฑิต สาขาวิชาพระธรรมทูต",
+          nameEn: "Master of Buddhism Program in Dhammaduta",
+          degreeTh: "พุทธศาสตรมหาบัณฑิต (พระธรรมทูต)",
+          degreeEn: "Master of Buddhism (Dhammaduta)",
+          degreeLevel: "MASTER",
+          departmentId: dtcDept.id,
+          department: "วิทยาลัยพระธรรมทูต",
+          durationYears: 2,
+          totalCredits: 39,
+          tuitionFeePerTerm: 35000,
+          status: "OPEN_ADMISSION",
+          admissionLink: "https://reg.mcu.ac.th",
+          curriculumPdfUrl: "https://www.mcu.ac.th/curriculum/tqf2-mbd-2566.pdf",
+          descriptionTh: "มุ่งสร้างบัณฑิตให้มีความรู้ความเข้าใจหลักพุทธธรรมและศาสตร์สมัยใหม่ โดยใช้กระบวนการสร้างและประยุกต์ความรู้ใหม่เพื่อพัฒนาสังคมสันติสุขและนำพุทธปัญญาสู่สากล",
+          descriptionEn: "To produce Buddhist graduates with in-depth understanding of Buddhadhamma and modern sciences, utilizing knowledge creation and innovation for social peace.",
+          careerPaths: [
+            "พระธรรมทูต หรือธรรมทูต",
+            "นักเผยแผ่พระพุทธศาสนา",
+            "นักวิชาการด้านพระพุทธศาสนาและการต่างประเทศ",
+            "เจ้าหน้าที่องค์กรระหว่างประเทศ",
+            "เจ้าหน้าที่สื่อสารมวลชน",
+            "เจ้าหน้าที่บริหารด้านต่างประเทศ",
+            "ที่ปรึกษาองค์กรภาครัฐและเอกชนระหว่างประเทศ",
+            "มัคคุเทศก์",
+            "พนักงานโรงแรมและพนักงานการบิน",
+            "วิทยากร นักบรรยาย และนักเขียน",
+            "อนุศาสนาจารย์",
+            "นักพัฒนาสังคม",
+            "นักพัฒนาด้านกิจการคณะสงฆ์",
+          ],
+        },
+      });
+    }
   }
 
   // Seed Booking Resources

@@ -16,10 +16,10 @@ export const createProgramSchema = z.object({
   totalCredits: z.number().int().min(1),
   tuitionFeePerTerm: z.number().optional().nullable(),
   careerPaths: z.array(z.string()).default([]),
-  admissionLink: z.string().url().max(500).optional().or(z.literal("")),
-  curriculumPdfUrl: z.string().url().max(500).optional().or(z.literal("")),
-  descriptionTh: z.string().optional(),
-  descriptionEn: z.string().optional(),
+  admissionLink: z.string().url().max(500).optional().nullable().or(z.literal("")),
+  curriculumPdfUrl: z.string().url().max(500).optional().nullable().or(z.literal("")),
+  descriptionTh: z.string().optional().nullable(),
+  descriptionEn: z.string().optional().nullable(),
   status: programStatusEnum.default("ACTIVE"),
 });
 

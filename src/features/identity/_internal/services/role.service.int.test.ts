@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { prisma } from "@/shared/lib/infra/prisma";
 import { seedCore, seedUser } from "../../../../../prisma/lib/seed-core";
+import { DEFAULT_ROLES } from "../../permissions";
 import { listRoles, createRole, updateRole, deleteRole } from "./role.service";
 
 async function setup() {
@@ -81,7 +82,8 @@ describe("role.service — A7: มอบสิทธิ์ที่ตัวเ�
     await expect(
       updateRole({ tenantId, actorId: adminId, ...staff, roleId: core.roleIds.VIEWER, nameTh: "x", nameEn: "x", description: "", permissionCodes: ["users:read", "settings:manage"] }),
     ).rejects.toMatchObject({ code: "forbidden", message: "cannot_grant_unheld_permission" });
-    expect((await listRoles(tenantId)).find((r) => r.code === "VIEWER")!.permissionCodes).toEqual(["users:read"]);
+    const expectedViewerPerms = [...DEFAULT_ROLES.find((r) => r.code === "VIEWER")!.permissions].sort();
+    expect((await listRoles(tenantId)).find((r) => r.code === "VIEWER")!.permissionCodes.sort()).toEqual(expectedViewerPerms);
 
     await updateRole({ tenantId, actorId: adminId, ...asSuper, roleId: core.roleIds.VIEWER, nameTh: "x", nameEn: "x", description: "", permissionCodes: ["users:read", "settings:manage"] });
     expect((await listRoles(tenantId)).find((r) => r.code === "VIEWER")!.permissionCodes.sort()).toEqual(["settings:manage", "users:read"]);

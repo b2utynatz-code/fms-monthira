@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { prisma } from "@/shared/lib/infra/prisma";
 import { seedCore, seedUser } from "../../../../../prisma/lib/seed-core";
+import { DEFAULT_ROLES } from "../../permissions";
 import { listUsers, createUser, updateUser, setUserActive, issuePasswordSetupLink, requestEmailChange, confirmEmailChange } from "./user.service";
 import { consumeToken } from "../tokens";
 
@@ -197,8 +198,11 @@ describe("user.service — F1: ป้องกันการยกระดั�
  * `isSuperAdmin` ของ F1 — ไม่ re-derive จากฐานข้อมูลเอง บทบาทจริงของ actor ใน DB จึงไม่ใช่ที่มาของอำนาจ
  */
 describe("user.service — F2: มอบบทบาทที่ถือสิทธิ์เกินตัวผู้กระทำไม่ได้", () => {
-  /** ผู้กระทำถือ users:read + users:manage (พอเข้าหน้าผู้ใช้และสร้างผู้ใช้ได้) แต่ไม่มีอีกสามสิทธิ์ที่ ADMIN ถือ */
-  const staff = { isSuperAdmin: false, permissions: ["users:read", "users:manage"] };
+  /** ผู้กระทำถือ users:read + users:manage (พอเข้าหน้าผู้ใช้และสร้างผู้ใช้ได้) และสิทธิ์ของ VIEWER แต่ไม่มีสิทธิ์ของ ADMIN ที่เหลือ */
+  const staff = {
+    isSuperAdmin: false,
+    permissions: ["users:read", "users:manage", ...DEFAULT_ROLES.find((r) => r.code === "VIEWER")!.permissions],
+  };
   const at = (roleId: string) => [{ roleId, scopeType: "ALL" as const, scopeId: null }];
 
   it("createUser: มอบบทบาทที่ถือสิทธิ์ที่ตัวเองไม่มีไม่ได้ แต่บทบาทที่เป็นสับเซตมอบได้", async () => {

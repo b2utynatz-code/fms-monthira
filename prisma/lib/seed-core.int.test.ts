@@ -3,6 +3,8 @@ import { prisma } from "@/shared/lib/infra/prisma";
 import { seedCore } from "./seed-core";
 import { ALL_PERMISSIONS } from "@/permissions";
 
+import { DEFAULT_ROLES } from "@/features/identity/permissions";
+
 describe("seedCore", () => {
   it("สร้าง tenant, permissions ทั้งหมด และบทบาทตั้งต้น 4 ตัว", async () => {
     const r = await seedCore(prisma, { tenantCode: "TEST", nameTh: "องค์กรทดสอบ", nameEn: "Test Org" });
@@ -11,7 +13,8 @@ describe("seedCore", () => {
     expect(roles.map((x) => x.code).sort()).toEqual(["ADMIN", "STAFF", "SUPER_ADMIN", "VIEWER"]);
     expect(roles.find((x) => x.code === "SUPER_ADMIN")!.isSystem).toBe(true);
     const admin = await prisma.role.findFirst({ where: { code: "ADMIN" }, include: { rolePermissions: true } });
-    expect(admin!.rolePermissions.length).toBe(5);
+    const expectedAdminCount = DEFAULT_ROLES.find((x) => x.code === "ADMIN")!.permissions.length;
+    expect(admin!.rolePermissions.length).toBe(expectedAdminCount);
     const superAdmin = await prisma.role.findFirst({ where: { code: "SUPER_ADMIN" }, include: { rolePermissions: true } });
     expect(superAdmin!.rolePermissions.length).toBe(0);
   });

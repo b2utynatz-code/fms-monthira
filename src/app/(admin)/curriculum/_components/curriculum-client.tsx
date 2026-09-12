@@ -118,6 +118,11 @@ export function CurriculumClient({
   const [durationYears, setDurationYears] = useState(4);
   const [totalCredits, setTotalCredits] = useState(128);
   const [tuitionFee, setTuitionFee] = useState<number | undefined>(undefined);
+  const [careerPathsText, setCareerPathsText] = useState("");
+  const [admissionLink, setAdmissionLink] = useState("");
+  const [curriculumPdfUrl, setCurriculumPdfUrl] = useState("");
+  const [descriptionTh, setDescriptionTh] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
   const [status, setStatus] = useState<"OPEN_ADMISSION" | "ACTIVE" | "PHASING_OUT" | "CLOSED">("ACTIVE");
 
   // Department Dialog states
@@ -149,13 +154,18 @@ export function CurriculumClient({
     setNameEn("");
     setDegreeTh("");
     setDegreeEn("");
-    setDegreeLevel("BACHELOR");
+    setDegreeLevel("MASTER");
     const defaultDept = departments[0];
     setDepartmentId(defaultDept ? defaultDept.id : "");
-    setDepartment(defaultDept ? defaultDept.nameTh : "ภาควิชาวิทยาการคอมพิวเตอร์");
-    setDurationYears(4);
-    setTotalCredits(128);
+    setDepartment(defaultDept ? defaultDept.nameTh : "");
+    setDurationYears(2);
+    setTotalCredits(39);
     setTuitionFee(undefined);
+    setCareerPathsText("");
+    setAdmissionLink("");
+    setCurriculumPdfUrl("");
+    setDescriptionTh("");
+    setDescriptionEn("");
     setStatus("ACTIVE");
     setModalOpen(true);
   };
@@ -173,6 +183,11 @@ export function CurriculumClient({
     setDurationYears(item.durationYears);
     setTotalCredits(item.totalCredits);
     setTuitionFee(item.tuitionFeePerTerm || undefined);
+    setCareerPathsText(item.careerPaths?.join(", ") || "");
+    setAdmissionLink(item.admissionLink || "");
+    setCurriculumPdfUrl(item.curriculumPdfUrl || "");
+    setDescriptionTh(item.descriptionTh || "");
+    setDescriptionEn(item.descriptionEn || "");
     setStatus(item.status);
     setModalOpen(true);
   };
@@ -182,6 +197,11 @@ export function CurriculumClient({
       toast.error(t("error.validation"));
       return;
     }
+
+    const parsedCareers = careerPathsText
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean);
 
     startTransition(async () => {
       if (editingItem) {
@@ -197,7 +217,12 @@ export function CurriculumClient({
           department,
           durationYears,
           totalCredits,
-          tuitionFeePerTerm: tuitionFee,
+          tuitionFeePerTerm: tuitionFee !== undefined && tuitionFee !== null && !isNaN(tuitionFee) ? Number(tuitionFee) : null,
+          careerPaths: parsedCareers,
+          admissionLink: admissionLink.trim() || null,
+          curriculumPdfUrl: curriculumPdfUrl.trim() || null,
+          descriptionTh: descriptionTh.trim() || null,
+          descriptionEn: descriptionEn.trim() || null,
           status,
         });
         if (res.ok) {
@@ -219,8 +244,12 @@ export function CurriculumClient({
           department,
           durationYears,
           totalCredits,
-          tuitionFeePerTerm: tuitionFee,
-          careerPaths: [],
+          tuitionFeePerTerm: tuitionFee !== undefined && tuitionFee !== null && !isNaN(tuitionFee) ? Number(tuitionFee) : null,
+          careerPaths: parsedCareers,
+          admissionLink: admissionLink.trim() || null,
+          curriculumPdfUrl: curriculumPdfUrl.trim() || null,
+          descriptionTh: descriptionTh.trim() || null,
+          descriptionEn: descriptionEn.trim() || null,
           status,
         };
         const res = await createProgramAction(payload);
@@ -717,7 +746,7 @@ export function CurriculumClient({
           title={editingItem ? t("curriculum.edit") : t("curriculum.create")}
           description={t("curriculum.description")}
         />
-        <LiyonDialogBody>
+        <LiyonDialogBody className="max-h-[65vh] overflow-y-auto pr-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
             <LiyonField label={t("curriculum.code")}>
               <input
@@ -822,6 +851,74 @@ export function CurriculumClient({
                 className="w-full rounded-md border px-3 py-2 text-sm"
               />
             </LiyonField>
+
+            <LiyonField label={t("curriculum.tuitionFee")}>
+              <input
+                type="number"
+                value={tuitionFee ?? ""}
+                onChange={(e) => setTuitionFee(e.target.value ? Number(e.target.value) : undefined)}
+                placeholder="เช่น 35000"
+                className="w-full rounded-md border px-3 py-2 text-sm"
+              />
+            </LiyonField>
+
+            <LiyonField label={t("curriculum.admissionLink")}>
+              <input
+                type="url"
+                value={admissionLink}
+                onChange={(e) => setAdmissionLink(e.target.value)}
+                placeholder="https://reg.mcu.ac.th หรือ ลิงก์สมัครเรียน"
+                className="w-full rounded-md border px-3 py-2 text-sm font-mono text-xs"
+              />
+            </LiyonField>
+
+            <div className="md:col-span-2">
+              <LiyonField label={t("curriculum.curriculumPdfUrl")}>
+                <input
+                  type="text"
+                  value={curriculumPdfUrl}
+                  onChange={(e) => setCurriculumPdfUrl(e.target.value)}
+                  placeholder="https://... หรือ /files/tqf2-mbd.pdf"
+                  className="w-full rounded-md border px-3 py-2 text-sm font-mono text-xs"
+                />
+              </LiyonField>
+            </div>
+
+            <div className="md:col-span-2">
+              <LiyonField label={t("curriculum.careerPaths")}>
+                <textarea
+                  rows={2}
+                  value={careerPathsText}
+                  onChange={(e) => setCareerPathsText(e.target.value)}
+                  placeholder={t("curriculum.careerPathsPh")}
+                  className="w-full rounded-md border p-2 text-sm"
+                />
+              </LiyonField>
+            </div>
+
+            <div className="md:col-span-2">
+              <LiyonField label={t("curriculum.descriptionTh")}>
+                <textarea
+                  rows={3}
+                  value={descriptionTh}
+                  onChange={(e) => setDescriptionTh(e.target.value)}
+                  placeholder="ปรัชญา วัตถุประสงค์ และจุดเด่นของหลักสูตร (ภาษาไทย)"
+                  className="w-full rounded-md border p-2 text-sm"
+                />
+              </LiyonField>
+            </div>
+
+            <div className="md:col-span-2">
+              <LiyonField label={t("curriculum.descriptionEn")}>
+                <textarea
+                  rows={3}
+                  value={descriptionEn}
+                  onChange={(e) => setDescriptionEn(e.target.value)}
+                  placeholder="Program Philosophy, Objectives & Highlights (English)"
+                  className="w-full rounded-md border p-2 text-sm"
+                />
+              </LiyonField>
+            </div>
           </div>
         </LiyonDialogBody>
         <LiyonDialogFooter>

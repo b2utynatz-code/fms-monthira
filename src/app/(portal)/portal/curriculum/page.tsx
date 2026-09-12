@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap, Clock, ArrowRight, Building2 } from "lucide-react";
+import { GraduationCap, Clock, ArrowRight, Building2, FileDown } from "lucide-react";
 import { prisma } from "@/shared/lib/infra/prisma";
 import { getLocale } from "@/shared/lib/i18n/server";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ const PROGRAM_IMAGES: Record<string, string> = {
   "CS-2026": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80",
   "IT-2026": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop&q=80",
   "DS-2026": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80",
+  "MBD-2566": "https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80",
 };
 
 export default async function PublicCurriculumPage() {
@@ -103,6 +104,32 @@ export default async function PublicCurriculumPage() {
                         : prog.department}
                     </span>
                   </div>
+
+                  {(prog.descriptionTh || prog.descriptionEn) && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 pt-1">
+                      {locale === "en" ? (prog.descriptionEn || prog.descriptionTh) : prog.descriptionTh}
+                    </p>
+                  )}
+
+                  {Array.isArray(prog.careerPaths) && (prog.careerPaths as string[]).length > 0 && (
+                    <div className="pt-2">
+                      <div className="flex flex-wrap gap-1">
+                        {(prog.careerPaths as string[]).slice(0, 3).map((career, idx) => (
+                          <span
+                            key={idx}
+                            className="text-[11px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium"
+                          >
+                            {career}
+                          </span>
+                        ))}
+                        {(prog.careerPaths as string[]).length > 3 && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
+                            +{(prog.careerPaths as string[]).length - 3} {locale === "en" ? "more" : "อาชีพ"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-4 border-t pt-4">
@@ -126,14 +153,25 @@ export default async function PublicCurriculumPage() {
                     </div>
                   )}
 
-                  {isOpen && (
-                    <Button asChild size="sm" className="w-full gap-2">
-                      <Link href={prog.admissionLink || "#"} target="_blank">
-                        <span>{locale === "en" ? "Apply Now" : "สมัครเข้าศึกษา"}</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  )}
+                  <div className="flex flex-col gap-2 pt-1">
+                    {prog.curriculumPdfUrl && (
+                      <Button asChild variant="outline" size="sm" className="w-full gap-2 text-xs">
+                        <Link href={prog.curriculumPdfUrl} target="_blank">
+                          <FileDown className="h-4 w-4 text-primary" />
+                          <span>{locale === "en" ? "Curriculum (TQF 2)" : "เอกสาร มคอ. 2 (PDF)"}</span>
+                        </Link>
+                      </Button>
+                    )}
+
+                    {isOpen && (
+                      <Button asChild size="sm" className="w-full gap-2">
+                        <Link href={prog.admissionLink || "#"} target="_blank">
+                          <span>{locale === "en" ? "Apply Now" : "สมัครเข้าศึกษา"}</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             );

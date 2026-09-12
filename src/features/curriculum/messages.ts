@@ -54,4 +54,13 @@ export const MESSAGES = {
   "curriculum.dept.searchPh": { th: "ค้นหารหัสภาควิชา, ชื่อภาควิชา, หัวหน้าภาค...", en: "Search department code, name, head..." },
   "curriculum.noSearchResults": { th: "ไม่พบข้อมูลหลักสูตรที่ตรงกับคำค้นหา", en: "No academic programs match your search" },
   "curriculum.dept.noSearchResults": { th: "ไม่พบข้อมูลภาควิชาที่ตรงกับคำค้นหา", en: "No departments match your search" },
+  "curriculum.careerPaths": { th: "อาชีพที่สามารถประกอบได้ (คั่นด้วยเครื่องหมายจุลภาค ,)", en: "Career Opportunities (Comma-separated)" },
+  "curriculum.careerPathsPh": { th: "เช่น พระธรรมทูต, นักเผยแผ่พระพุทธศาสนา, นักวิชาการต่างประเทศ", en: "e.g. Dhammaduta, Buddhist Missionary, International Affairs Officer" },
+  "curriculum.descriptionTh": { th: "ปรัชญาและคำอธิบายหลักสูตร (ไทย)", en: "Philosophy & Description (Thai)" },
+  "curriculum.descriptionEn": { th: "ปรัชญาและคำอธิบายหลักสูตร (English)", en: "Philosophy & Description (English)" },
+  "curriculum.curriculumPdfUrl": { th: "ลิงก์ไฟล์เอกสาร มคอ. 2 (PDF URL)", en: "Curriculum Specification PDF URL" },
+  "curriculum.admissionLink": { th: "ลิงก์ระบบรับสมัครเข้าศึกษา (Admission URL)", en: "Admission Application URL" },
+  "curriculum.downloadPdf": { th: "ดาวน์โหลดเล่ม มคอ. 2 (PDF)", en: "Download Curriculum (TQF 2)" },
+  "curriculum.careersTitle": { th: "อาชีพที่สามารถประกอบได้หลังสำเร็จการศึกษา", en: "Career Opportunities" },
+  "curriculum.philosophyTitle": { th: "ปรัชญาและวัตถุประสงค์", en: "Philosophy & Objectives" },
 } as const;

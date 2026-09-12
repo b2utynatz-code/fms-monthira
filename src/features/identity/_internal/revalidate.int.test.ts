@@ -2,6 +2,9 @@ import { describe, it, expect, vi } from "vitest";
 import { prisma } from "@/shared/lib/infra/prisma";
 import { seedCore, seedUser } from "../../../../prisma/lib/seed-core";
 import { applyAuthorizationSnapshot, loadAuthorizationSnapshot, needsRevalidation, REVALIDATE_MS, type RevalidatableToken, type SnapshotLoader } from "./revalidate";
+import { DEFAULT_ROLES } from "../permissions";
+
+const expectedPermissions = [...new Set([...DEFAULT_ROLES.find((r) => r.code === "ADMIN")!.permissions, ...DEFAULT_ROLES.find((r) => r.code === "VIEWER")!.permissions])].sort();
 
 async function setup() {
   const core = await seedCore(prisma, { tenantCode: "T", nameTh: "ท", nameEn: "T" });
@@ -22,7 +25,7 @@ describe("loadAuthorizationSnapshot", () => {
   it("คืน grants รวมจากหลายบทบาท", async () => {
     const { core, userId } = await setup();
     const s = await loadAuthorizationSnapshot(userId, core.tenantId);
-    expect(s && !s.invalid && s.permissions.sort()).toEqual(["audit:read", "roles:manage", "settings:manage", "users:manage", "users:read"]);
+    expect(s && !s.invalid && s.permissions.sort()).toEqual(expectedPermissions);
     expect(s && !s.invalid && s.roles.map((r) => r.code).sort()).toEqual(["ADMIN", "VIEWER"]);
   });
   it("ผู้ใช้ถูกระงับ / สมาชิกภาพปิด / ไม่มีสมาชิกภาพ → invalid", async () => {
@@ -63,7 +66,7 @@ describe("applyAuthorizationSnapshot", () => {
     const token: RevalidatableToken = { userId, tenantId: core.tenantId, checkedAt: now - REVALIDATE_MS - 1, permissions: ["stale:only"], isSuperAdmin: true };
     const next = await applyAuthorizationSnapshot(token, loader.load, now);
     expect(loader.calls()).toBe(1);
-    expect(next.permissions!.sort()).toEqual(["audit:read", "roles:manage", "settings:manage", "users:manage", "users:read"]);
+    expect(next.permissions!.sort()).toEqual(expectedPermissions);
     expect(next.isSuperAdmin).toBe(false);
     expect(next.invalid).toBe(false);
     expect(next.checkedAt).toBe(now);
