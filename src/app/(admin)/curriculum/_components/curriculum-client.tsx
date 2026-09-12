@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Edit2, Trash2, BookOpen, AlertCircle, Building2, Mail, Phone, MapPin } from "lucide-react";
+import { Plus, Edit2, Trash2, BookOpen, AlertCircle, Building2, Mail, Phone, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
 import {
   DataTable,
@@ -67,6 +67,37 @@ export function CurriculumClient({
   const [items, setItems] = useState<AcademicProgramDto[]>(initialItems);
   const [departments, setDepartments] = useState<AcademicDepartmentDto[]>(initialDepartments);
   const [isPending, startTransition] = useTransition();
+
+  // Search states for programs and departments
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deptSearchQuery, setDeptSearchQuery] = useState("");
+
+  const filteredItems = items.filter((item) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      item.code.toLowerCase().includes(q) ||
+      item.nameTh.toLowerCase().includes(q) ||
+      item.nameEn.toLowerCase().includes(q) ||
+      (item.degreeTh || "").toLowerCase().includes(q) ||
+      (item.degreeEn || "").toLowerCase().includes(q) ||
+      (item.department || "").toLowerCase().includes(q) ||
+      (item.departmentNameTh || "").toLowerCase().includes(q)
+    );
+  });
+
+  const filteredDepartments = departments.filter((dept) => {
+    if (!deptSearchQuery.trim()) return true;
+    const q = deptSearchQuery.toLowerCase().trim();
+    return (
+      dept.code.toLowerCase().includes(q) ||
+      dept.nameTh.toLowerCase().includes(q) ||
+      dept.nameEn.toLowerCase().includes(q) ||
+      (dept.headNameTh || "").toLowerCase().includes(q) ||
+      (dept.headNameEn || "").toLowerCase().includes(q) ||
+      (dept.contactEmail || "").toLowerCase().includes(q)
+    );
+  });
 
   // Program Dialog states
   const [modalOpen, setModalOpen] = useState(false);
@@ -560,11 +591,34 @@ export function CurriculumClient({
       {activeTab === "programs" && (
         <LiyonCard>
           <DataTable<AcademicProgramDto>
-            state={items.length === 0 ? "empty" : "data"}
-            rows={items}
+            state={filteredItems.length === 0 ? "empty" : "data"}
+            rows={filteredItems}
             columns={programColumns}
             getRowId={(row) => row.id}
             headHeading={<span>{t("curriculum.tab.programs")}</span>}
+            toolbar={
+              <div className="flex items-center gap-3 w-full max-w-md">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t("curriculum.searchPh")}
+                    className="w-full pl-9 pr-8 py-1.5 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+            }
             renderRowMenu={
               canManage
                 ? (row) => (
@@ -581,8 +635,8 @@ export function CurriculumClient({
             }
             empty={{
               icon: <BookOpen className="h-10 w-10 text-muted-foreground/50" />,
-              title: t("curriculum.title"),
-              description: t("curriculum.description"),
+              title: searchQuery.trim() ? t("curriculum.noSearchResults") : t("curriculum.title"),
+              description: searchQuery.trim() ? `"${searchQuery}"` : t("curriculum.description"),
             }}
             error={{
               icon: <AlertCircle className="h-10 w-10 text-destructive" />,
@@ -596,11 +650,34 @@ export function CurriculumClient({
       {activeTab === "departments" && (
         <LiyonCard>
           <DataTable<AcademicDepartmentDto>
-            state={departments.length === 0 ? "empty" : "data"}
-            rows={departments}
+            state={filteredDepartments.length === 0 ? "empty" : "data"}
+            rows={filteredDepartments}
             columns={departmentColumns}
             getRowId={(row) => row.id}
             headHeading={<span>{t("curriculum.tab.departments")}</span>}
+            toolbar={
+              <div className="flex items-center gap-3 w-full max-w-md">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <input
+                    type="search"
+                    value={deptSearchQuery}
+                    onChange={(e) => setDeptSearchQuery(e.target.value)}
+                    placeholder={t("curriculum.dept.searchPh")}
+                    className="w-full pl-9 pr-8 py-1.5 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  {deptSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setDeptSearchQuery("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+            }
             renderRowMenu={
               canManage
                 ? (row) => (
@@ -621,8 +698,8 @@ export function CurriculumClient({
             }
             empty={{
               icon: <Building2 className="h-10 w-10 text-muted-foreground/50" />,
-              title: t("curriculum.dept.title"),
-              description: t("curriculum.dept.description"),
+              title: deptSearchQuery.trim() ? t("curriculum.dept.noSearchResults") : t("curriculum.dept.title"),
+              description: deptSearchQuery.trim() ? `"${deptSearchQuery}"` : t("curriculum.dept.description"),
             }}
             error={{
               icon: <AlertCircle className="h-10 w-10 text-destructive" />,

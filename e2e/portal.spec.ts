@@ -153,5 +153,18 @@ test.describe("Portal & Valley Hero Tests", () => {
     const deptSelect = page.locator("select").filter({ hasText: /CS|เลือกภาควิชา/i });
     await expect(deptSelect).toBeVisible();
     await page.getByRole("button", { name: /ยกเลิก|Cancel/i }).click();
+
+    // ทดสอบช่องค้นหารหัสและหลักสูตร
+    const searchInput = page.getByPlaceholder(/ค้นหารหัส, ชื่อหลักสูตร/i);
+    await expect(searchInput).toBeVisible();
+
+    // ค้นหาด้วยรหัส "CS-2026"
+    await searchInput.fill("CS-2026");
+    await expect(page.getByText("CS-2026")).toBeVisible();
+    await expect(page.getByText("IT-2026")).not.toBeVisible();
+
+    // ล้างช่องค้นหา
+    await searchInput.fill("");
+    await expect(page.getByText("IT-2026")).toBeVisible();
   });
 });

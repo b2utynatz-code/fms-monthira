@@ -49,4 +49,9 @@ export const MESSAGES = {
   "curriculum.dept.status": { th: "สถานะ", en: "Status" },
   "curriculum.dept.programs": { th: "หลักสูตร", en: "Programs" },
   "curriculum.selectDepartment": { th: "เลือกภาควิชา / ส่วนงาน", en: "Select Department" },
+  "curriculum.search": { th: "ค้นหาหลักสูตร", en: "Search Programs" },
+  "curriculum.searchPh": { th: "ค้นหารหัส, ชื่อหลักสูตร, ภาควิชา...", en: "Search code, program name, department..." },
+  "curriculum.dept.searchPh": { th: "ค้นหารหัสภาควิชา, ชื่อภาควิชา, หัวหน้าภาค...", en: "Search department code, name, head..." },
+  "curriculum.noSearchResults": { th: "ไม่พบข้อมูลหลักสูตรที่ตรงกับคำค้นหา", en: "No academic programs match your search" },
+  "curriculum.dept.noSearchResults": { th: "ไม่พบข้อมูลภาควิชาที่ตรงกับคำค้นหา", en: "No departments match your search" },
 } as const;
