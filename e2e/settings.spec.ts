@@ -50,3 +50,33 @@ test("หน้า settings แสดงส่วนตั้งค่า SMTP G
   await expect(page.getByRole("button", { name: /ส่งอีเมลทดสอบ/ })).toBeVisible();
 });
 
+test("หน้า settings แสดงส่วนข้อมูลการติดต่อ สามารถแก้ไข และนำไปแสดงผลที่หน้า Portal Footer", async ({ page }) => {
+  await page.goto("/settings");
+  await expect(page.getByText(/ข้อมูลการติดต่อและที่อยู่/)).toBeVisible();
+  await expect(page.locator("#s-contact-phone")).toBeVisible();
+  await expect(page.locator("#s-contact-email")).toBeVisible();
+  await expect(page.locator("#s-contact-address-th")).toBeVisible();
+
+  // แก้ไขเบอร์และอีเมล
+  const testPhone = "02-999-8888 ต่อ 999";
+  const testEmail = "info-test@fms.ac.th";
+  await page.fill("#s-contact-phone", testPhone);
+  await page.fill("#s-contact-email", testEmail);
+  await page.getByRole("button", { name: /^บันทึก$/ }).click();
+  await expect(page.getByText(/บันทึกการตั้งค่าแล้ว/)).toBeVisible();
+
+  // ตรวจสอบในหน้า Portal
+  await page.goto("/portal");
+  const footer = page.locator("footer");
+  await expect(footer).toContainText(testPhone);
+  await expect(footer).toContainText(testEmail);
+
+  // คืนค่า
+  await page.goto("/settings");
+  await page.fill("#s-contact-phone", "02-123-4567 ต่อ 100-104");
+  await page.fill("#s-contact-email", "contact@fms.ac.th");
+  await page.getByRole("button", { name: /^บันทึก$/ }).click();
+  await expect(page.getByText(/บันทึกการตั้งค่าแล้ว/)).toBeVisible();
+});
+
+

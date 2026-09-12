@@ -21,6 +21,7 @@ import {
   Clock,
   ChevronRight,
   ArrowUp,
+  Globe,
 } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "next-themes";
@@ -30,19 +31,21 @@ import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Button } from "@/components/ui/button";
 import { useLocale, useT } from "@/shared/lib/i18n/client";
 import { useAppSession } from "@/hooks/use-session";
-import { hasPermission, P } from "@/features/identity";
+import { hasPermission, P, type ContactSettings } from "@/features/identity";
 
 export interface PortalLayoutClientProps {
   tenant?: {
     nameTh?: string | null;
     nameEn?: string | null;
     logoUrl?: string | null;
+    contact?: ContactSettings | null;
   } | null;
   children: React.ReactNode;
 }
 
 export function PortalLayoutClient({ tenant, children }: PortalLayoutClientProps) {
   const locale = useLocale();
+  const contact = tenant?.contact;
   const t = useT();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
@@ -488,26 +491,85 @@ export function PortalLayoutClient({ tenant, children }: PortalLayoutClientProps
               {locale === "en" ? "CONTACT & HOURS" : "ติดต่อและเวลาทำการ"}
             </h4>
             <div className="space-y-3 text-xs text-[var(--ink-band-muted)]">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="h-4 w-4 shrink-0 text-[var(--brand-light)] mt-0.5" />
-                <span className="leading-relaxed">
-                  {locale === "en"
-                    ? "Faculty of Management Sciences, 123 University Avenue, Bangkok 10000"
-                    : "คณะวิทยาการจัดการ 123 ถนนมหาวิทยาลัย แขวงในเมือง เขตเมือง กรุงเทพฯ 10000"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Phone className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
-                <span>02-123-4567 {locale === "en" ? "ext. 100-104" : "ต่อ 100-104"}</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Mail className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
-                <span>contact@fms.ac.th</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Clock className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
-                <span>{locale === "en" ? "Mon – Fri: 08:30 – 16:30" : "จันทร์ – ศุกร์: 08:30 – 16:30 น."}</span>
-              </div>
+              {(contact?.addressTh || contact?.addressEn) && (
+                <div className="flex items-start gap-2.5">
+                  <MapPin className="h-4 w-4 shrink-0 text-[var(--brand-light)] mt-0.5" />
+                  <span className="leading-relaxed">
+                    {locale === "en"
+                      ? (contact.addressEn || contact.addressTh)
+                      : (contact.addressTh || contact.addressEn)}
+                  </span>
+                </div>
+              )}
+              {contact?.phone && (
+                <div className="flex items-center gap-2.5">
+                  <Phone className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
+                  <a
+                    href={`tel:${contact.phone.replace(/[^0-9+]/g, "")}`}
+                    className="hover:text-[var(--ink-band-text)] transition-colors"
+                  >
+                    {contact.phone}
+                  </a>
+                </div>
+              )}
+              {contact?.email && (
+                <div className="flex items-center gap-2.5">
+                  <Mail className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className="hover:text-[var(--ink-band-text)] transition-colors"
+                  >
+                    {contact.email}
+                  </a>
+                </div>
+              )}
+              {(contact?.hoursTh || contact?.hoursEn) && (
+                <div className="flex items-center gap-2.5">
+                  <Clock className="h-4 w-4 shrink-0 text-[var(--brand-light)]" />
+                  <span>
+                    {locale === "en"
+                      ? (contact.hoursEn || contact.hoursTh)
+                      : (contact.hoursTh || contact.hoursEn)}
+                  </span>
+                </div>
+              )}
+
+              {/* Social links */}
+              {(contact?.facebook || contact?.line || contact?.website) && (
+                <div className="flex items-center gap-2 pt-1 flex-wrap">
+                  {contact.facebook && (
+                    <a
+                      href={contact.facebook.startsWith("http") ? contact.facebook : `https://${contact.facebook}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-[var(--ink-band-text)] transition-colors text-[11px] font-medium"
+                    >
+                      Facebook
+                    </a>
+                  )}
+                  {contact.line && (
+                    <a
+                      href={contact.line.startsWith("http") ? contact.line : `https://line.me/R/ti/p/${contact.line}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 rounded bg-[#06C755]/20 hover:bg-[#06C755]/30 text-emerald-300 transition-colors text-[11px] font-medium"
+                    >
+                      LINE
+                    </a>
+                  )}
+                  {contact.website && (
+                    <a
+                      href={contact.website.startsWith("http") ? contact.website : `https://${contact.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-[var(--ink-band-text)] transition-colors text-[11px] font-medium"
+                    >
+                      <Globe className="h-3 w-3" />
+                      <span>Web</span>
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -18,6 +18,18 @@ export interface SmtpSettings {
   fromEmail: string;
 }
 
+export interface ContactSettings {
+  phone: string;
+  email: string;
+  addressTh: string;
+  addressEn: string;
+  hoursTh: string;
+  hoursEn: string;
+  facebook?: string;
+  line?: string;
+  website?: string;
+}
+
 export interface TenantSettings {
   code: string;
   nameTh: string;
@@ -25,12 +37,13 @@ export interface TenantSettings {
   logoUrl: string | null;
   palette: PaletteId;
   smtp?: SmtpSettings;
+  contact?: ContactSettings;
 }
 
 async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSettings> {
   const t = await db.tenant.findUnique({ where: { id: tenantId } });
   if (!t) throw errors.not_found();
-  const raw = (t.settings as { palette?: unknown; smtp?: Partial<SmtpSettings> } | null) || {};
+  const raw = (t.settings as { palette?: unknown; smtp?: Partial<SmtpSettings>; contact?: Partial<ContactSettings> } | null) || {};
   const p = raw.palette;
   const rawSmtp = raw.smtp;
   const hasPass = Boolean(rawSmtp?.pass && rawSmtp.pass.length > 0);
@@ -46,6 +59,20 @@ async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSetti
     fromName: rawSmtp?.fromName || "",
     fromEmail: rawSmtp?.fromEmail || "",
   };
+
+  const rawContact = raw.contact;
+  const contact: ContactSettings = {
+    phone: rawContact?.phone ?? "02-123-4567 ต่อ 100-104",
+    email: rawContact?.email ?? "contact@fms.ac.th",
+    addressTh: rawContact?.addressTh ?? "คณะวิทยาการจัดการ 123 ถนนมหาวิทยาลัย แขวงในเมือง เขตเมือง กรุงเทพฯ 10000",
+    addressEn: rawContact?.addressEn ?? "Faculty of Management Sciences, 123 University Avenue, Bangkok 10000",
+    hoursTh: rawContact?.hoursTh ?? "จันทร์ – ศุกร์: 08:30 – 16:30 น.",
+    hoursEn: rawContact?.hoursEn ?? "Mon – Fri: 08:30 – 16:30",
+    facebook: rawContact?.facebook ?? "",
+    line: rawContact?.line ?? "",
+    website: rawContact?.website ?? "",
+  };
+
   return {
     code: t.code,
     nameTh: t.nameTh,
@@ -53,6 +80,7 @@ async function readTenantSettings(tenantId: string, db: Db): Promise<TenantSetti
     logoUrl: t.logoUrl,
     palette: isPalette(p) ? p : DEFAULT_PALETTE,
     smtp,
+    contact,
   };
 }
 
@@ -108,6 +136,7 @@ export async function updateTenantSettings(input: { tenantId: string; actorId: s
       ...existingSettings,
       palette: input.palette,
       ...(newSmtp ? { smtp: newSmtp } : {}),
+      ...(input.contact ? { contact: input.contact } : {}),
     };
 
     await tx.tenant.update({

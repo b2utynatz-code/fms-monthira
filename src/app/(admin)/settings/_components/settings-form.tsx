@@ -2,7 +2,7 @@
 import { useState, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Upload, Loader2, Image as ImageIcon, Mail, ExternalLink, Eye, EyeOff, Send } from "lucide-react";
+import { Upload, Loader2, Image as ImageIcon, Mail, ExternalLink, Eye, EyeOff, Send, MapPin, Phone, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LiyonCard, LiyonField, PalettePicker } from "@/shared/components/liyon";
 import { useT } from "@/shared/lib/i18n/client";
@@ -29,6 +29,17 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
       pass: "",
       fromName: initial.smtp?.fromName || "",
       fromEmail: initial.smtp?.fromEmail || "",
+    },
+    contact: {
+      phone: initial.contact?.phone ?? "02-123-4567 ต่อ 100-104",
+      email: initial.contact?.email ?? "contact@fms.ac.th",
+      addressTh: initial.contact?.addressTh ?? "คณะวิทยาการจัดการ 123 ถนนมหาวิทยาลัย แขวงในเมือง เขตเมือง กรุงเทพฯ 10000",
+      addressEn: initial.contact?.addressEn ?? "Faculty of Management Sciences, 123 University Avenue, Bangkok 10000",
+      hoursTh: initial.contact?.hoursTh ?? "จันทร์ – ศุกร์: 08:30 – 16:30 น.",
+      hoursEn: initial.contact?.hoursEn ?? "Mon – Fri: 08:30 – 16:30",
+      facebook: initial.contact?.facebook ?? "",
+      line: initial.contact?.line ?? "",
+      website: initial.contact?.website ?? "",
     },
   });
   const hasExistingPass = Boolean(initial.smtp?.hasPass);
@@ -366,6 +377,142 @@ export function SettingsForm({ initial }: { initial: TenantSettings }) {
                     </>
                   )}
                 </Button>
+              </div>
+            </div>
+          </div>
+        </LiyonCard>
+
+        {/* Contact Information & Portal Location Card */}
+        <LiyonCard>
+          <div className="pb-3 border-b">
+            <h2 className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              <span>{t("settings.contactTitle")}</span>
+            </h2>
+            <p className="text-sm text-muted-foreground mt-0.5">{t("settings.contactDesc")}</p>
+          </div>
+
+          <div className="fields">
+            {/* Phone and Email */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LiyonField label={t("settings.contactPhone")} htmlFor="s-contact-phone" error={errors["contact.phone"]?.[0]}>
+                <div className="relative flex items-center">
+                  <Phone className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <input
+                    id="s-contact-phone"
+                    type="text"
+                    placeholder={t("settings.contactPhonePh")}
+                    value={form.contact.phone}
+                    onChange={(e) => setForm({ ...form, contact: { ...form.contact, phone: e.target.value } })}
+                    className="pl-9 w-full"
+                  />
+                </div>
+              </LiyonField>
+
+              <LiyonField label={t("settings.contactEmail")} htmlFor="s-contact-email" error={errors["contact.email"]?.[0]}>
+                <div className="relative flex items-center">
+                  <Mail className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <input
+                    id="s-contact-email"
+                    type="email"
+                    placeholder={t("settings.contactEmailPh")}
+                    value={form.contact.email}
+                    onChange={(e) => setForm({ ...form, contact: { ...form.contact, email: e.target.value } })}
+                    className="pl-9 w-full"
+                  />
+                </div>
+              </LiyonField>
+            </div>
+
+            {/* Address TH & EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LiyonField label={t("settings.contactAddressTh")} htmlFor="s-contact-address-th" error={errors["contact.addressTh"]?.[0]}>
+                <textarea
+                  id="s-contact-address-th"
+                  rows={2}
+                  placeholder={t("settings.contactAddressThPh")}
+                  value={form.contact.addressTh}
+                  onChange={(e) => setForm({ ...form, contact: { ...form.contact, addressTh: e.target.value } })}
+                  className="w-full rounded-md border p-2 text-sm bg-background"
+                />
+              </LiyonField>
+
+              <LiyonField label={t("settings.contactAddressEn")} htmlFor="s-contact-address-en" error={errors["contact.addressEn"]?.[0]}>
+                <textarea
+                  id="s-contact-address-en"
+                  rows={2}
+                  placeholder={t("settings.contactAddressEnPh")}
+                  value={form.contact.addressEn}
+                  onChange={(e) => setForm({ ...form, contact: { ...form.contact, addressEn: e.target.value } })}
+                  className="w-full rounded-md border p-2 text-sm bg-background"
+                />
+              </LiyonField>
+            </div>
+
+            {/* Hours TH & EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LiyonField label={t("settings.contactHoursTh")} htmlFor="s-contact-hours-th" error={errors["contact.hoursTh"]?.[0]}>
+                <div className="relative flex items-center">
+                  <Clock className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <input
+                    id="s-contact-hours-th"
+                    type="text"
+                    placeholder={t("settings.contactHoursThPh")}
+                    value={form.contact.hoursTh}
+                    onChange={(e) => setForm({ ...form, contact: { ...form.contact, hoursTh: e.target.value } })}
+                    className="pl-9 w-full"
+                  />
+                </div>
+              </LiyonField>
+
+              <LiyonField label={t("settings.contactHoursEn")} htmlFor="s-contact-hours-en" error={errors["contact.hoursEn"]?.[0]}>
+                <div className="relative flex items-center">
+                  <Clock className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <input
+                    id="s-contact-hours-en"
+                    type="text"
+                    placeholder={t("settings.contactHoursEnPh")}
+                    value={form.contact.hoursEn}
+                    onChange={(e) => setForm({ ...form, contact: { ...form.contact, hoursEn: e.target.value } })}
+                    className="pl-9 w-full"
+                  />
+                </div>
+              </LiyonField>
+            </div>
+
+            {/* Social Media Links */}
+            <div className="pt-2 border-t space-y-3">
+              <h3 className="text-sm font-semibold">{t("settings.contactSocialTitle")}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <LiyonField label={t("settings.contactFacebook")} htmlFor="s-contact-fb" hint={t("common.optional")}>
+                  <input
+                    id="s-contact-fb"
+                    type="url"
+                    placeholder={t("settings.contactFacebookPh")}
+                    value={form.contact.facebook}
+                    onChange={(e) => setForm({ ...form, contact: { ...form.contact, facebook: e.target.value } })}
+                  />
+                </LiyonField>
+
+                <LiyonField label={t("settings.contactLine")} htmlFor="s-contact-line" hint={t("common.optional")}>
+                  <input
+                    id="s-contact-line"
+                    type="text"
+                    placeholder={t("settings.contactLinePh")}
+                    value={form.contact.line}
+                    onChange={(e) => setForm({ ...form, contact: { ...form.contact, line: e.target.value } })}
+                  />
+                </LiyonField>
+
+                <LiyonField label={t("settings.contactWebsite")} htmlFor="s-contact-web" hint={t("common.optional")}>
+                  <input
+                    id="s-contact-web"
+                    type="url"
+                    placeholder={t("settings.contactWebsitePh")}
+                    value={form.contact.website}
+                    onChange={(e) => setForm({ ...form, contact: { ...form.contact, website: e.target.value } })}
+                  />
+                </LiyonField>
               </div>
             </div>
           </div>

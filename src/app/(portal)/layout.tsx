@@ -12,6 +12,7 @@ export default async function PortalLayout({ children }: { children: React.React
               nameTh: tenant.nameTh,
               nameEn: tenant.nameEn,
               logoUrl: tenant.logoUrl,
+              contact: tenant.contact,
             }
           : null
       }

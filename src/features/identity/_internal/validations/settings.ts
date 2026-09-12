@@ -45,6 +45,18 @@ export const testSmtpSchema = z.object({
   }),
 });
 
+export const contactSettingsSchema = z.object({
+  phone: z.string().trim().max(100).default(""),
+  email: z.string().trim().email("รูปแบบอีเมลไม่ถูกต้อง").max(255).optional().or(z.literal("")).default(""),
+  addressTh: z.string().trim().max(500).default(""),
+  addressEn: z.string().trim().max(500).default(""),
+  hoursTh: z.string().trim().max(200).default(""),
+  hoursEn: z.string().trim().max(200).default(""),
+  facebook: z.string().trim().max(255).default(""),
+  line: z.string().trim().max(100).default(""),
+  website: z.string().trim().max(255).default(""),
+});
+
 export const updateSettingsSchema = z.object({
   nameTh: z.string().trim().min(1).max(255),
   nameEn: z.string().trim().min(1).max(255),
@@ -59,10 +71,12 @@ export const updateSettingsSchema = z.object({
     .default(""),
   palette: z.enum(PALETTE_IDS),
   smtp: smtpSettingsSchema.optional(),
+  contact: contactSettingsSchema.optional(),
 });
 export const updateProfileSchema = z.object({ name: z.string().trim().min(1).max(255), locale: z.enum(["th", "en"]) });
 export type SmtpSettingsInput = z.infer<typeof smtpSettingsSchema>;
 export type TestSmtpInput = z.infer<typeof testSmtpSchema>;
+export type ContactSettingsInput = z.infer<typeof contactSettingsSchema>;
 export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
