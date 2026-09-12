@@ -36,3 +36,5 @@ export { LiyonCard } from "./card";
 export type { LiyonCardProps } from "./card";
 export { useBreadcrumbTail, useBreadcrumbTailItems, useBreadcrumbTailStore } from "./breadcrumb-tail";
 export type { Crumb } from "./breadcrumb-tail";
+export { TinyEditor } from "./tiny-editor";
+export type { TinyEditorProps } from "./tiny-editor";

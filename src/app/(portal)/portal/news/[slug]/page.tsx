@@ -75,9 +75,18 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
       )}
 
       {/* Article Content */}
-      <div className="prose dark:prose-invert max-w-none text-base leading-relaxed whitespace-pre-line py-4 border-b">
-        {locale === "en" ? news.contentEn || news.contentTh : news.contentTh}
-      </div>
+      {/<[a-z][\s\S]*>/i.test(locale === "en" ? news.contentEn || news.contentTh : news.contentTh) ? (
+        <div
+          className="prose dark:prose-invert max-w-none text-base leading-relaxed py-4 border-b [&_img]:rounded-xl [&_img]:max-h-[500px] [&_img]:mx-auto [&_blockquote]:border-l-4 [&_blockquote]:border-primary/60 [&_blockquote]:pl-4"
+          dangerouslySetInnerHTML={{
+            __html: locale === "en" ? news.contentEn || news.contentTh : news.contentTh,
+          }}
+        />
+      ) : (
+        <div className="prose dark:prose-invert max-w-none text-base leading-relaxed whitespace-pre-line py-4 border-b">
+          {locale === "en" ? news.contentEn || news.contentTh : news.contentTh}
+        </div>
+      )}
 
       <div className="flex items-center justify-between pt-4">
         <div className="text-xs text-muted-foreground">

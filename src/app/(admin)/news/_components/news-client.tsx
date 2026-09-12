@@ -14,6 +14,7 @@ import {
   LiyonDialogFooter,
   LiyonField,
   LiyonSelect,
+  TinyEditor,
   type DataTableColumn,
 } from "@/shared/components/liyon";
 import { Button } from "@/components/ui/button";
@@ -364,23 +365,21 @@ export function NewsClient({ initialItems, canManage }: NewsClientProps) {
             </LiyonField>
             <div className="md:col-span-2">
               <LiyonField label={t("news.contentTh")}>
-                <textarea
-                  rows={4}
+                <TinyEditor
                   value={contentTh}
-                  onChange={(e) => setContentTh(e.target.value)}
-                  placeholder="เนื้อหาข่าวภาษาไทย..."
-                  className="w-full rounded-md border px-3 py-2 text-sm font-mono"
+                  onChange={setContentTh}
+                  placeholder="พิมพ์หรือจัดรูปแบบเนื้อหาข่าวภาษาไทย (รองรับตัวหนา, หัวข้อ, รูปภาพ, ลิงก์)..."
+                  minHeight="240px"
                 />
               </LiyonField>
             </div>
             <div className="md:col-span-2">
               <LiyonField label={t("news.contentEn")}>
-                <textarea
-                  rows={4}
+                <TinyEditor
                   value={contentEn}
-                  onChange={(e) => setContentEn(e.target.value)}
-                  placeholder="News content (English)..."
-                  className="w-full rounded-md border px-3 py-2 text-sm font-mono"
+                  onChange={setContentEn}
+                  placeholder="Type or format news content in English..."
+                  minHeight="200px"
                 />
               </LiyonField>
             </div>

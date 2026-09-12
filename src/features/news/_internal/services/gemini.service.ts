@@ -32,10 +32,10 @@ export async function translateNewsWithGemini(input: TranslateNewsInput): Promis
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const promptText = `
-Translate the following Thai university news announcement into natural, accurate, and professional English.
+Translate the following Thai university news announcement into natural, accurate, and professional English:
 - Provide a clear, compelling English title ('titleEn').
 - If Thai summary is provided, translate it; if not provided or empty, craft an engaging 1-2 sentence English summary ('summaryEn') based on the content.
-- Translate the full content into professional English ('contentEn') preserving all dates, names, contacts, and formatting structure.
+- Translate the full content into professional English ('contentEn') preserving all dates, names, contacts, and formatting structure. If the Thai content contains HTML tags (such as <p>, <strong>, <em>, <h2>, <h3>, <h4>, <ul>, <li>, <a>, <blockquote>, <hr>, <code>), preserve those exact HTML tags and hierarchical layout in 'contentEn'.
 
 Thai Content to translate:
 Title (TH): ${input.titleTh}
